@@ -20,7 +20,7 @@ const AuditLogSchema = new mongoose.Schema({
     },
     performerRole: {
         type: String,
-        enum: ['ADMIN', 'EMPLOYEE', 'STUDENT'],
+        enum: ['ADMIN', 'EMPLOYEE'],
         required: true,
     },
     metadata: {

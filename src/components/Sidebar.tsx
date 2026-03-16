@@ -39,7 +39,7 @@ export default function Sidebar() {
             href={href}
             className={`group flex items-center justify-between px-4 py-3 rounded-xl mb-1 text-sm font-medium transition-all duration-200 ${isActive(href)
                 ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20 translate-x-1'
-                : 'text-gray-100 hover:bg-white/10 hover:text-white'
+                : 'text-gray-700 hover:bg-gray-100 hover:text-navy-900'
                 }`}
         >
             <span>{children}</span>
@@ -81,20 +81,22 @@ export default function Sidebar() {
 
     return (
         <>
-            {/* Mobile Header (Glass with High Contrast) */}
-            <header className="md:hidden fixed top-0 left-0 right-0 h-16 bg-navy-900/90 backdrop-blur-md z-[50] px-4 flex items-center justify-between border-b border-white/10 shadow-sm">
-                <Image
-                    src="/logo-new.png"
-                    alt="PromptiX"
-                    width={100}
-                    height={32}
-                    className="h-8 w-auto object-contain brightness-0 invert"
-                />
+            {/* Mobile Header */}
+            <header className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white/95 backdrop-blur-md z-[50] px-4 flex items-center justify-between border-b border-gray-200 shadow-sm">
+                <div className="bg-white rounded-lg px-3 py-1 flex items-center shadow-md border border-gray-100">
+                    <Image
+                        src="/promptix-logo-dark.png"
+                        alt="PromptiX"
+                        width={120}
+                        height={40}
+                        className="h-9 w-auto object-contain scale-125"
+                    />
+                </div>
                 <div className="flex items-center gap-3">
                     <NotificationBell />
                     <button
                         onClick={() => setIsOpen(!isOpen)}
-                        className="p-2 text-white hover:bg-white/10 rounded-full transition-colors active:scale-95"
+                        className="p-2 text-navy-900 hover:bg-gray-100 rounded-full transition-colors active:scale-95"
                         aria-label="Toggle Menu"
                     >
                         {isOpen ? <X size={24} /> : <Menu size={24} />}
@@ -107,43 +109,45 @@ export default function Sidebar() {
 
             {/* Mobile Overlay (Backdrop) */}
             <div
-                className={`md:hidden fixed inset-0 bg-navy-950/80 backdrop-blur-sm z-[55] transition-opacity duration-300 ease-out ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+                className={`md:hidden fixed inset-0 bg-navy-900/50 backdrop-blur-sm z-[55] transition-opacity duration-300 ease-out ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
                     }`}
                 onClick={() => setIsOpen(false)}
             />
 
-            {/* Sidebar Container (Glassmorphism) */}
+            {/* Sidebar Container */}
             <aside className={`
                 fixed left-0 top-0 h-[100dvh] w-[85vw] max-w-[300px] md:w-64 
-                bg-navy-900/95 backdrop-blur-xl text-white flex flex-col shadow-2xl z-[60] border-r border-white/10
+                bg-white text-navy-900 flex flex-col shadow-2xl z-[60] border-r border-gray-200
                 transform transition-transform duration-300 cubic-bezier(0.16, 1, 0.3, 1)
                 ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
             `}>
                 {/* Logo Area */}
-                <div className="h-20 flex items-center justify-center border-b border-white/10 bg-white/5 relative">
-                    <Image
-                        src="/logo-new.png"
-                        alt="PromptiX CRM"
-                        width={180}
-                        height={60}
-                        className="h-10 w-auto object-contain brightness-0 invert"
-                        priority
-                    />
+                <div className="h-40 flex flex-col items-center justify-center border-b border-gray-200 bg-gray-50 relative">
+                    <div className="bg-white px-5 py-3 rounded-2xl shadow-sm border border-gray-200 flex items-center justify-center mt-2 group hover:shadow-md transition-all">
+                        <Image
+                            src="/promptix-logo-dark.png"
+                            alt="PromptiX CRM"
+                            width={160}
+                            height={160}
+                            className="h-20 w-auto object-contain scale-[1.3] group-hover:scale-[1.35] transition-transform"
+                            priority
+                        />
+                    </div>
                     {/* Close button visible only on mobile inside drawer for easier reach */}
                     <button
                         onClick={() => setIsOpen(false)}
-                        className="md:hidden absolute right-4 top-1/2 -translate-y-1/2 p-2 text-gray-300 hover:text-white"
+                        className="md:hidden absolute right-4 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-navy-900"
                     >
                         <X size={20} />
                     </button>
                 </div>
 
                 {/* User Profile Summary */}
-                <div className="p-6 border-b border-white/10 bg-white/5">
+                <div className="p-6 border-b border-gray-200 bg-white">
                     <div className="flex items-center gap-4">
                         <div className="relative shrink-0">
-                            <div className="w-12 h-12 rounded-full p-[2px] bg-gradient-to-tr from-orange-500 to-pink-500 shadow-lg shadow-orange-500/20">
-                                <div className="w-full h-full rounded-full bg-navy-900 flex items-center justify-center overflow-hidden border-2 border-white/10">
+                            <div className="w-12 h-12 rounded-full p-[2px] bg-gradient-to-tr from-orange-400 to-orange-600 shadow-sm">
+                                <div className="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden border-2 border-white">
                                     {user.photo ? (
                                         <Image
                                             src={user.photo}
@@ -156,19 +160,19 @@ export default function Sidebar() {
                                     )}
                                 </div>
                             </div>
-                            <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-navy-900 rounded-full box-content"></div>
+                            <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full box-content"></div>
                         </div>
                         <div className="overflow-hidden">
-                            <h3 className="font-semibold text-white truncate text-base tracking-wide text-shadow-sm">{user.name}</h3>
-                            <p className="text-xs text-orange-400 font-bold tracking-wider uppercase">{user.role}</p>
+                            <h3 className="font-semibold text-navy-900 truncate text-base tracking-wide">{user.name}</h3>
+                            <p className="text-xs text-orange-600 font-bold tracking-wider uppercase">{user.role}</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Navigation Links */}
-                <nav className="flex-1 px-3 py-4 overflow-y-auto overscroll-contain scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
-                    <div className="text-xs font-bold text-gray-400 mb-3 px-4 uppercase tracking-wider flex items-center gap-2">
-                        <span className="w-8 h-[1px] bg-white/20"></span> Main Menu
+                <nav className="flex-1 px-3 py-4 overflow-y-auto overscroll-contain scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
+                    <div className="text-xs font-bold text-gray-500 mb-3 px-4 uppercase tracking-wider flex items-center gap-2">
+                        <span className="w-8 h-[1px] bg-gray-300"></span> Main Menu
                     </div>
                     <div className="space-y-1">
                         {currentMenu.map((item) => (
@@ -180,14 +184,14 @@ export default function Sidebar() {
                 </nav>
 
                 {/* Footer Actions */}
-                <div className="p-4 border-t border-white/10 bg-white/5">
-                    <div className="md:hidden mb-4 flex justify-between items-center text-xs text-gray-400 px-2">
+                <div className="p-4 border-t border-gray-200 bg-gray-50">
+                    <div className="md:hidden mb-4 flex justify-between items-center text-xs text-gray-500 px-2">
                         <span>v1.2.0</span>
                         <span>PromptiX CRM</span>
                     </div>
                     <button
                         onClick={logout}
-                        className="w-full py-3 px-4 bg-white/5 hover:bg-red-500/20 text-gray-200 hover:text-white border border-white/10 hover:border-red-500/30 rounded-xl transition-all duration-200 text-sm font-semibold flex items-center justify-center gap-3 group backdrop-blur-sm"
+                        className="w-full py-3 px-4 bg-white hover:bg-gray-100 text-gray-700 hover:text-red-600 border border-gray-200 rounded-xl transition-all duration-200 text-sm font-semibold flex items-center justify-center gap-3 group shadow-sm"
                     >
                         <LogOut size={18} className="group-hover:-translate-x-1 transition-transform" />
                         <span>Sign Out</span>

@@ -155,8 +155,8 @@ export default function IndividualSalaryPage() {
     };
 
     const filteredEmployees = employees.filter(emp =>
-        emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        emp.email.toLowerCase().includes(searchTerm.toLowerCase())
+        (emp?.name || '').toLowerCase().includes((searchTerm || '').toLowerCase()) ||
+        (emp?.email || '').toLowerCase().includes((searchTerm || '').toLowerCase())
     );
 
     return (
@@ -199,11 +199,11 @@ export default function IndividualSalaryPage() {
                                             }`}
                                     >
                                         <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-50 to-white border border-indigo-100 flex items-center justify-center text-indigo-700 font-bold">
-                                            {emp.name.charAt(0)}
+                                            {emp?.name?.charAt(0) || 'U'}
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <div className="font-bold text-navy-900 truncate">{emp.name}</div>
-                                            <div className="text-xs text-gray-500 truncate">{emp.email}</div>
+                                            <div className="font-bold text-navy-900 truncate">{emp?.name || 'Unknown User'}</div>
+                                            <div className="text-xs text-gray-500 truncate">{emp?.email || 'No email provided'}</div>
                                         </div>
                                     </button>
                                 ))}

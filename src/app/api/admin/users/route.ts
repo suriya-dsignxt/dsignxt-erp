@@ -25,7 +25,7 @@ export async function GET(req: Request) {
             ];
         }
 
-        // Use Aggregation to join CourseEnrollment and Course
+        // Use Aggregation to get users without passwords
         const users = await User.aggregate([
             { $match: query },
             { $sort: { createdAt: -1 } },

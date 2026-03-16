@@ -42,6 +42,20 @@ const TaskSchema = new mongoose.Schema(
             min: 0,
             max: 100,
         },
+        startDate: {
+            type: Date,
+            required: false,
+        },
+        endDate: {
+            type: Date,
+            required: false,
+        },
+        estimatedHours: {
+            type: Number,
+            required: false,
+            min: 0,
+            max: 1000,
+        },
         dueDate: {
             type: Date,
             required: false,
@@ -61,8 +75,18 @@ TaskSchema.index({ dueDate: 1 });
 TaskSchema.index({ assignedTo: 1 });
 TaskSchema.index({ status: 1 });
 
-// Pre-save hook to handle status/progress/completedAt syncing
+// Pre-save hook to handle status/progress/completedAt syncing and date validation
 TaskSchema.pre('save', async function () {
+    // Validate date range
+    if (this.startDate && this.endDate && new Date(this.startDate) > new Date(this.endDate)) {
+        throw new Error('Start date must be before end date');
+    }
+
+    // Backward compatibility: sync dueDate with endDate
+    if (this.endDate && !this.dueDate) {
+        this.dueDate = this.endDate;
+    }
+
     // If status is "Completed", ensure progress is 100% and completedAt is set
     if (this.status === 'Completed') {
         this.progressPercentage = 100;

@@ -1,0 +1,82 @@
+================================================================================
+STARTING E2E API TESTS
+================================================================================
+
+📋 PHASE 1: Authentication & RBAC
+[Phase 1] Admin Login: PASS - Successfully logged in as admin
+[Phase 1] Employee Login: PASS - Successfully logged in as employee
+[Phase 1] Student Login: PASS - Successfully logged in as student
+[Phase 1] RBAC Protection: PASS - Student correctly blocked from admin API
+[Phase 1] Logout API: PASS - Logout endpoint working
+
+📋 PHASE 2: Student Onboarding
+[Phase 2] Onboarding Status Check: INFO - Student needs onboarding: true
+[Phase 2] Onboarding Submission: WARN - Status: 404 - May already be completed
+
+📋 PHASE 3: User Management
+[Phase 3] Fetch Users: PASS - Retrieved 10 users
+
+📋 PHASE 4: Attendance
+[Phase 4] Employee Check-in: INFO - Already checked in today
+[Phase 4] Admin Fetch Attendance: PASS - Retrieved attendance records
+
+📋 PHASE 5: Leave Management
+[Phase 5] Submit Leave: INFO - Conflict detected (expected)
+[Phase 5] Admin Fetch Leaves: PASS - Retrieved leave records
+
+📋 PHASE 6: Courses
+[Phase 6] Fetch Courses: FAIL - Status: 404
+[Phase 6] Student Fetch Courses: FAIL - Status: 404
+
+📋 PHASE 7: Events
+[Phase 7] Fetch Events: PASS - Retrieved 0 events
+
+📋 PHASE 8: Notifications
+[Phase 8] Fetch Notifications: PASS - Retrieved 0 notifications (0 unread)
+
+📋 PHASE 9: Audit Logs
+[Phase 9] Fetch Audit Logs: PASS - Retrieved 20 audit logs
+[Phase 9] Audit Log Protection: PASS - Employee correctly blocked from audit logs
+
+📋 PHASE 10: Analytics
+[Phase 10] Admin Analytics: PASS - Stats: {"employees":6,"events":0,"pendingLeaves":1,"goals":{"active":0},"leaves":{"pending":1,"approved":7,"rejected":1,"total":9},"attendance":{"pending":2,"approved":76,"total":78},"salary":{"draft":0,"approved":2,"paid":5,"total":7},"passwordRequests":{"pending":0},"weeklyAttendance":[{"date":"2026-03-03","Pending":0,"Approved":1,"Rejected":0},{"date":"2026-03-04","Pending":0,"Approved":2,"Rejected":0},{"date":"2026-03-05","Pending":0,"Approved":2,"Rejected":0},{"date":"2026-03-06","Pending":0,"Approved":2,"Rejected":0},{"date":"2026-03-07","Pending":0,"Approved":2,"Rejected":0},{"date":"2026-03-08","Pending":1,"Approved":0,"Rejected":0},{"date":"2026-03-09","Pending":1,"Approved":1,"Rejected":0}],"trends":{"employees":20},"salaryTrends":[{"name":"Feb 2026","amount":833.34,"count":1}]}
+[Phase 10] Employee Analytics: PASS - Retrieved employee stats
+[Phase 10] Student Analytics: FAIL - Status: 404
+
+================================================================================
+TEST SUMMARY
+================================================================================
+✅ PASSED: 14
+❌ FAILED: 3
+⚠️  WARNINGS: 4
+
+❌ FAILED TESTS:
+  [Phase 6] Fetch Courses: FAIL - Status: 404
+  [Phase 6] Student Fetch Courses: FAIL - Status: 404
+  [Phase 10] Student Analytics: FAIL - Status: 404
+
+⚠️  WARNINGS:
+  [Phase 2] Onboarding Status Check: INFO - Student needs onboarding: true
+  [Phase 2] Onboarding Submission: WARN - Status: 404 - May already be completed
+  [Phase 4] Employee Check-in: INFO - Already checked in today
+  [Phase 5] Submit Leave: INFO - Conflict detected (expected)
+
+✅ PASSED TESTS:
+  [Phase 1] Admin Login: PASS - Successfully logged in as admin
+  [Phase 1] Employee Login: PASS - Successfully logged in as employee
+  [Phase 1] Student Login: PASS - Successfully logged in as student
+  [Phase 1] RBAC Protection: PASS - Student correctly blocked from admin API
+  [Phase 1] Logout API: PASS - Logout endpoint working
+  [Phase 3] Fetch Users: PASS - Retrieved 10 users
+  [Phase 4] Admin Fetch Attendance: PASS - Retrieved attendance records
+  [Phase 5] Admin Fetch Leaves: PASS - Retrieved leave records
+  [Phase 7] Fetch Events: PASS - Retrieved 0 events
+  [Phase 8] Fetch Notifications: PASS - Retrieved 0 notifications (0 unread)
+  [Phase 9] Fetch Audit Logs: PASS - Retrieved 20 audit logs
+  [Phase 9] Audit Log Protection: PASS - Employee correctly blocked from audit logs
+  [Phase 10] Admin Analytics: PASS - Stats: {"employees":6,"events":0,"pendingLeaves":1,"goals":{"active":0},"leaves":{"pending":1,"approved":7,"rejected":1,"total":9},"attendance":{"pending":2,"approved":76,"total":78},"salary":{"draft":0,"approved":2,"paid":5,"total":7},"passwordRequests":{"pending":0},"weeklyAttendance":[{"date":"2026-03-03","Pending":0,"Approved":1,"Rejected":0},{"date":"2026-03-04","Pending":0,"Approved":2,"Rejected":0},{"date":"2026-03-05","Pending":0,"Approved":2,"Rejected":0},{"date":"2026-03-06","Pending":0,"Approved":2,"Rejected":0},{"date":"2026-03-07","Pending":0,"Approved":2,"Rejected":0},{"date":"2026-03-08","Pending":1,"Approved":0,"Rejected":0},{"date":"2026-03-09","Pending":1,"Approved":1,"Rejected":0}],"trends":{"employees":20},"salaryTrends":[{"name":"Feb 2026","amount":833.34,"count":1}]}
+  [Phase 10] Employee Analytics: PASS - Retrieved employee stats
+
+================================================================================
+OVERALL: ❌ SOME TESTS FAILED
+================================================================================

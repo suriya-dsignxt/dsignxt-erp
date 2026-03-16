@@ -9,7 +9,7 @@ export default function LandingPage() {
       {/* Navbar */}
       <nav className="flex items-center justify-between px-8 py-5 bg-white shadow-sm border-b border-gray-100">
         <div className="flex items-center gap-2">
-          <Image src="/logo-new.png" alt="PromptiX" width={150} height={40} className="h-10 w-auto object-contain" />
+          <Image src="/promptix-logo-dark.png" alt="PromptiX" width={200} height={200} className="h-20 w-auto object-contain scale-110 origin-left" />
         </div>
         <div className="flex gap-4">
           <Link href="/login" className="px-5 py-2 text-sm font-medium text-navy-900 hover:text-orange-500 transition-colors">

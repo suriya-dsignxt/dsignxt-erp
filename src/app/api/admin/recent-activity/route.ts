@@ -23,100 +23,144 @@ export async function GET() {
     }
 
     try {
-        // Fetch last 15 audit log entries
+        // Fetch last 15 audit log entries with user population
         const activities = await AuditLog.find({})
-            .sort({ timestamp: -1 })
+            .sort({ createdAt: -1 })
             .limit(15)
-            .select('action performedBy details timestamp')
+            .populate('performedBy', 'name email')
             .lean();
 
         // Format activities with user-friendly messages and icons
         const formattedActivities = activities.map((activity: any) => {
             let icon = '📋';
-            let message = activity.action;
+            let message = activity.actionType || 'Unknown Action';
             let color = 'gray';
 
-            switch (activity.action) {
-                case 'USER_CREATED':
-                    icon = '👤';
-                    message = `New user registered: ${activity.details?.name || 'User'}`;
-                    color = 'green';
+            const userName = activity.performedBy?.name || 'User';
+            const userEmail = activity.performedBy?.email || '';
+            const metadata = activity.metadata || {};
+
+            // Format based on actionType
+            switch (activity.actionType) {
+                case 'CREATE':
+                    if (activity.entityType === 'User') {
+                        icon = '👤';
+                        message = `New user created: ${metadata.userName || userName}`;
+                        color = 'green';
+                    } else if (activity.entityType === 'Event') {
+                        icon = '📅';
+                        message = `Event created: ${metadata.title || 'New Event'}`;
+                        color = 'blue';
+                    } else if (activity.entityType === 'Announcement') {
+                        icon = '📢';
+                        message = `Announcement posted: ${metadata.title || 'New Announcement'}`;
+                        color = 'orange';
+                    } else if (activity.entityType === 'Goal') {
+                        icon = '🎯';
+                        message = `Goal created: ${metadata.title || 'New Goal'}`;
+                        color = 'purple';
+                    } else {
+                        icon = '✨';
+                        message = `${activity.entityType} created by ${userName}`;
+                        color = 'blue';
+                    }
                     break;
-                case 'ATTENDANCE_MARKED':
-                    icon = '✅';
-                    message = `Attendance marked by ${activity.performedBy}`;
-                    color = 'blue';
+
+                case 'UPDATE':
+                    if (activity.entityType === 'Attendance') {
+                        icon = '✅';
+                        message = `Attendance updated for ${metadata.userName || userName}`;
+                        color = 'blue';
+                    } else if (activity.entityType === 'LeaveRequest') {
+                        if (metadata.status === 'APPROVED') {
+                            icon = '✅';
+                            message = `Leave approved for ${metadata.userName || userName}`;
+                            color = 'green';
+                        } else if (metadata.status === 'REJECTED') {
+                            icon = '❌';
+                            message = `Leave rejected for ${metadata.userName || userName}`;
+                            color = 'red';
+                        } else {
+                            icon = '📝';
+                            message = `Leave request updated for ${metadata.userName || userName}`;
+                            color = 'yellow';
+                        }
+                    } else if (activity.entityType === 'MonthlySalary') {
+                        if (metadata.status === 'APPROVED') {
+                            icon = '💰';
+                            message = `Salary approved for ${metadata.userName || userName}`;
+                            color = 'green';
+                        } else if (metadata.status === 'PAID') {
+                            icon = '💵';
+                            message = `Salary marked as paid for ${metadata.userName || userName}`;
+                            color = 'green';
+                        } else {
+                            icon = '💰';
+                            message = `Salary updated for ${metadata.userName || userName}`;
+                            color = 'purple';
+                        }
+                    } else {
+                        icon = '🔄';
+                        message = `${activity.entityType} updated by ${userName}`;
+                        color = 'blue';
+                    }
                     break;
-                case 'ATTENDANCE_APPROVED':
-                    icon = '🟢';
-                    message = `Attendance approved for ${activity.details?.userName || 'user'}`;
-                    color = 'green';
-                    break;
-                case 'LEAVE_REQUESTED':
-                    icon = '📝';
-                    message = `Leave request submitted by ${activity.performedBy}`;
-                    color = 'yellow';
-                    break;
-                case 'LEAVE_APPROVED':
-                    icon = '✅';
-                    message = `Leave approved for ${activity.details?.userName || activity.performedBy}`;
-                    color = 'green';
-                    break;
-                case 'LEAVE_REJECTED':
-                    icon = '❌';
-                    message = `Leave rejected for ${activity.details?.userName || activity.performedBy}`;
+
+                case 'DELETE':
+                    icon = '🗑️';
+                    message = `${activity.entityType} deleted by ${userName}`;
                     color = 'red';
                     break;
-                case 'SALARY_GENERATED':
-                    icon = '💰';
-                    message = `Salary generated for ${activity.details?.month || 'month'}`;
-                    color = 'purple';
-                    break;
-                case 'SALARY_APPROVED':
+
+                case 'MARK_ATTENDANCE':
                     icon = '✅';
-                    message = `Salary approved for ${activity.details?.userName || 'employee'}`;
-                    color = 'green';
-                    break;
-                case 'SALARY_PAID':
-                    icon = '💵';
-                    message = `Salary marked as paid for ${activity.details?.userName || 'employee'}`;
-                    color = 'green';
-                    break;
-                case 'EVENT_CREATED':
-                    icon = '📅';
-                    message = `Event created: ${activity.details?.title || 'New Event'}`;
+                    message = `Attendance marked by ${userName}`;
                     color = 'blue';
                     break;
-                case 'ANNOUNCEMENT_POSTED':
-                    icon = '📢';
-                    message = `Announcement posted: ${activity.details?.title || 'New Announcement'}`;
-                    color = 'orange';
+
+                case 'APPROVE':
+                    if (activity.entityType === 'Attendance') {
+                        icon = '🟢';
+                        message = `Attendance approved for ${metadata.userName || userName}`;
+                        color = 'green';
+                    } else if (activity.entityType === 'LeaveRequest') {
+                        icon = '✅';
+                        message = `Leave approved for ${metadata.userName || userName}`;
+                        color = 'green';
+                    } else {
+                        icon = '✅';
+                        message = `${activity.entityType} approved by ${userName}`;
+                        color = 'green';
+                    }
                     break;
+
+                case 'REJECT':
+                    icon = '❌';
+                    message = `${activity.entityType} rejected by ${userName}`;
+                    color = 'red';
+                    break;
+
                 case 'PASSWORD_RESET':
                     icon = '🔐';
-                    message = `Password reset for ${activity.details?.userName || 'user'}`;
+                    message = `Password reset for ${metadata.userName || userName}`;
                     color = 'red';
                     break;
-                case 'COURSE_CREATED':
-                    icon = '📚';
-                    message = `Course created: ${activity.details?.title || 'New Course'}`;
-                    color = 'blue';
-                    break;
+
                 default:
                     icon = '📋';
-                    message = activity.action ? activity.action.replace(/_/g, ' ').toLowerCase() : 'Unknown Action';
+                    message = `${activity.actionType || 'Action'} on ${activity.entityType || 'entity'}`;
                     color = 'gray';
             }
 
             return {
                 id: activity._id,
-                action: activity.action,
+                action: activity.actionType,
                 message,
                 icon,
                 color,
-                performedBy: activity.performedBy,
-                timestamp: activity.timestamp,
-                timeAgo: getTimeAgo(activity.timestamp)
+                performedBy: userEmail || userName,
+                timestamp: activity.createdAt,
+                timeAgo: getTimeAgo(activity.createdAt)
             };
         });
 
@@ -132,13 +176,22 @@ export async function GET() {
 }
 
 // Helper function to format time ago
-function getTimeAgo(timestamp: Date): string {
+function getTimeAgo(timestamp: Date | null | undefined): string {
+    if (!timestamp) {
+        return 'Unknown time';
+    }
+
+    const date = new Date(timestamp);
+    if (isNaN(date.getTime())) {
+        return 'Invalid date';
+    }
+
     const now = new Date();
-    const secondsAgo = Math.floor((now.getTime() - new Date(timestamp).getTime()) / 1000);
+    const secondsAgo = Math.floor((now.getTime() - date.getTime()) / 1000);
 
     if (secondsAgo < 60) return 'Just now';
     if (secondsAgo < 3600) return `${Math.floor(secondsAgo / 60)} minutes ago`;
     if (secondsAgo < 86400) return `${Math.floor(secondsAgo / 3600)} hours ago`;
     if (secondsAgo < 604800) return `${Math.floor(secondsAgo / 86400)} days ago`;
-    return new Date(timestamp).toLocaleDateString();
+    return date.toLocaleDateString();
 }

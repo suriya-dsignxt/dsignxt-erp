@@ -78,26 +78,9 @@ async function runTests() {
         log('Phase 1', 'Employee Login', 'PASS', 'Successfully logged in as employee');
     } else {
         log('Phase 1', 'Employee Login', 'FAIL', `Status: ${employeeLogin.status}`);
-    }
-
-    // Test 1.3: Student Login
-    const studentLogin = await request('POST', '/api/auth/login', {
-        email: 'student2@gmail.com',
-        password: 'password123'
-    });
-
-    if (studentLogin.status === 200 && studentLogin.cookie) {
-        studentCookie = studentLogin.cookie;
-        log('Phase 1', 'Student Login', 'PASS', 'Successfully logged in as student');
-    } else {
+    } else {
         log('Phase 1', 'Student Login', 'FAIL', `Status: ${studentLogin.status}`);
-    }
-
-    // Test 1.4: RBAC - Student cannot access Admin API
-    const rbacTest = await request('GET', '/api/admin/stats', null, studentCookie);
-    if (rbacTest.status === 401 || rbacTest.status === 403) {
-        log('Phase 1', 'RBAC Protection', 'PASS', 'Student correctly blocked from admin API');
-    } else {
+    } else {
         log('Phase 1', 'RBAC Protection', 'FAIL', `Student accessed admin API with status: ${rbacTest.status}`);
     }
 
@@ -108,34 +91,6 @@ async function runTests() {
     } else {
         log('Phase 1', 'Logout API', 'FAIL', `Status: ${logout.status}`);
     }
-
-    // PHASE 2: Student Onboarding
-    console.log('\n📋 PHASE 2: Student Onboarding');
-
-    // Test 2.1: Check if student needs onboarding
-    const meCheck = await request('GET', '/api/auth/me', null, studentCookie);
-    if (meCheck.data.user) {
-        const needsOnboarding = !meCheck.data.user.isOnboardingCompleted;
-        log('Phase 2', 'Onboarding Status Check', 'INFO', `Student needs onboarding: ${needsOnboarding}`);
-    }
-
-    // Test 2.2: Submit onboarding (if needed)
-    const onboarding = await request('POST', '/api/student/onboarding', {
-        phone: '9876543210',
-        fatherName: 'Test Father',
-        course: 'Full Stack Development',
-        fees: 50000,
-        paid: 25000,
-        address: '123 Test Street'
-    }, studentCookie);
-
-    if (onboarding.status === 200) {
-        log('Phase 2', 'Onboarding Submission', 'PASS', 'Onboarding completed successfully');
-        if (onboarding.cookie) studentCookie = onboarding.cookie; // Update cookie with new token
-    } else {
-        log('Phase 2', 'Onboarding Submission', 'WARN', `Status: ${onboarding.status} - May already be completed`);
-    }
-
     // PHASE 3: User Management
     console.log('\n📋 PHASE 3: User Management');
 
@@ -202,23 +157,6 @@ async function runTests() {
 
     // PHASE 6: Courses
     console.log('\n📋 PHASE 6: Courses');
-
-    // Test 6.1: Fetch courses
-    const courses = await request('GET', '/api/courses', null, adminCookie);
-    if (courses.status === 200) {
-        log('Phase 6', 'Fetch Courses', 'PASS', `Retrieved ${courses.data.courses?.length || 0} courses`);
-    } else {
-        log('Phase 6', 'Fetch Courses', 'FAIL', `Status: ${courses.status}`);
-    }
-
-    // Test 6.2: Student fetch their courses
-    const studentCourses = await request('GET', '/api/student/courses', null, studentCookie);
-    if (studentCourses.status === 200) {
-        log('Phase 6', 'Student Fetch Courses', 'PASS', 'Retrieved student courses');
-    } else {
-        log('Phase 6', 'Student Fetch Courses', 'FAIL', `Status: ${studentCourses.status}`);
-    }
-
     // PHASE 7: Events
     console.log('\n📋 PHASE 7: Events');
 
@@ -280,15 +218,6 @@ async function runTests() {
     } else {
         log('Phase 10', 'Employee Analytics', 'FAIL', `Status: ${employeeStats.status}`);
     }
-
-    // Test 10.3: Student stats
-    const studentStats = await request('GET', '/api/student/stats', null, studentCookie);
-    if (studentStats.status === 200) {
-        log('Phase 10', 'Student Analytics', 'PASS', 'Retrieved student stats');
-    } else {
-        log('Phase 10', 'Student Analytics', 'FAIL', `Status: ${studentStats.status}`);
-    }
-
     // SUMMARY
     console.log('\n' + '='.repeat(80));
     console.log('TEST SUMMARY');

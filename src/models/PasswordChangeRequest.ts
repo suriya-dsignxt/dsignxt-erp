@@ -7,7 +7,7 @@ const PasswordChangeRequestSchema = new mongoose.Schema({
         required: true
     },
     role: {
-        type: String, // 'EMPLOYEE' | 'STUDENT'
+        type: String, // 'EMPLOYEE'
         required: true
     },
     reason: {

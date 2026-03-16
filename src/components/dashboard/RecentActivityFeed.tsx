@@ -71,7 +71,25 @@ export default function RecentActivityFeed() {
         );
     }
 
-    if (activities.length === 0) return null;
+    if (activities.length === 0) {
+        return (
+            <ModernGlassCard>
+                <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-2">
+                        <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
+                            <ActivityIcon size={18} />
+                        </div>
+                        <h3 className="text-lg font-bold text-navy-900">Recent Activity</h3>
+                    </div>
+                </div>
+                <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+                    <ActivityIcon className="w-12 h-12 mb-3 opacity-20" />
+                    <p className="text-sm font-medium text-gray-500">No recent activity</p>
+                    <p className="text-xs text-gray-400 mt-1">Activity will appear here once actions are performed</p>
+                </div>
+            </ModernGlassCard>
+        );
+    }
 
     return (
         <ModernGlassCard className="h-full flex flex-col">

@@ -69,9 +69,9 @@ export default function AuditLogsPage() {
             accessor: (log: AuditLog) => (
                 <div className="flex items-center gap-3">
                     <div className={`p-2 rounded-lg ${(log.actionType.includes('APPROVED') || log.actionType.includes('ACTIVATED') || log.actionType.includes('CREATED')) ? 'bg-green-50 text-green-600' :
-                            (log.actionType.includes('REJECTED') || log.actionType.includes('DEACTIVATED') || log.actionType.includes('DELETED')) ? 'bg-red-50 text-red-600' :
-                                (log.actionType.includes('UPDATED') || log.actionType.includes('EDITED')) ? 'bg-blue-50 text-blue-600' :
-                                    'bg-gray-50 text-gray-600'
+                        (log.actionType.includes('REJECTED') || log.actionType.includes('DEACTIVATED') || log.actionType.includes('DELETED')) ? 'bg-red-50 text-red-600' :
+                            (log.actionType.includes('UPDATED') || log.actionType.includes('EDITED')) ? 'bg-blue-50 text-blue-600' :
+                                'bg-gray-50 text-gray-600'
                         }`}>
                         <Activity size={16} />
                     </div>
@@ -156,9 +156,6 @@ export default function AuditLogsPage() {
                                     <option value="LEAVE_REJECTED">Leave Rejected</option>
                                     <option value="USER_ACTIVATED">User Activated</option>
                                     <option value="USER_DEACTIVATED">User Deactivated</option>
-                                    <option value="COURSE_CREATED">Course Created</option>
-                                    <option value="COURSE_UPDATED">Course Updated</option>
-                                    <option value="COURSE_DELETED">Course Deleted</option>
                                     <option value="Event Created">Event Created</option>
                                 </select>
                             </div>

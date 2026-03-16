@@ -4,7 +4,7 @@ import { AuthProvider } from '@/context/AuthContext';
 
 export const metadata: Metadata = {
   title: 'PromptiX CRM',
-  description: 'Internal CRM handling Admin, Employee, and Student portals',
+  description: 'Internal CRM handling Admin and Employee portals',
 };
 
 import { Toaster } from 'sonner';

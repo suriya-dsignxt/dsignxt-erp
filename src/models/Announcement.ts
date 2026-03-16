@@ -15,7 +15,7 @@ const AnnouncementSchema = new mongoose.Schema({
     },
     target: {
         type: String,
-        enum: ['All', 'Employees', 'Students'],
+        enum: ['All', 'Employees'],
         default: 'All',
     },
     createdBy: {

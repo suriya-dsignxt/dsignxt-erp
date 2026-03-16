@@ -155,14 +155,14 @@ export default function AdminUsers() {
                             />
                         ) : (
                             <div className="w-full h-full rounded-xl bg-gradient-to-br from-indigo-100 to-white border border-indigo-50 flex items-center justify-center text-indigo-600 font-bold text-lg shadow-sm">
-                                {user.name.charAt(0)}
+                                {user?.name?.charAt(0) || 'U'}
                             </div>
                         )}
                         <span className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${user.status === 'Active' ? 'bg-green-500' : 'bg-gray-400'}`}></span>
                     </div>
                     <div>
-                        <div className="font-bold text-navy-900 leading-tight">{user.name}</div>
-                        <div className="text-xs text-gray-500 font-medium">{user.role}</div>
+                        <div className="font-bold text-navy-900 leading-tight">{user?.name || 'Unknown User'}</div>
+                        <div className="text-xs text-gray-500 font-medium">{user?.role || 'Unknown Role'}</div>
                     </div>
                 </div>
             ),

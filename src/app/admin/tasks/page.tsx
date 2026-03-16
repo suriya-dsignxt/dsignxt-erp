@@ -74,6 +74,9 @@ export default function AdminTasksPage() {
         goalId: '',
         priority: 'Medium',
         status: 'Pending',
+        startDate: '',
+        endDate: '',
+        estimatedHours: '',
         dueDate: ''
     });
 
@@ -122,10 +125,13 @@ export default function AdminTasksPage() {
             setFormData({
                 title: task.title,
                 description: task.description || '',
-                assignedTo: task.assignedTo._id,
+                assignedTo: task.assignedTo?._id || '',
                 goalId: task.goalId?._id || '',
                 priority: task.priority,
                 status: task.status,
+                startDate: (task as any).startDate ? new Date((task as any).startDate).toISOString().split('T')[0] : '',
+                endDate: (task as any).endDate ? new Date((task as any).endDate).toISOString().split('T')[0] : '',
+                estimatedHours: (task as any).estimatedHours?.toString() || '',
                 dueDate: task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : ''
             });
         } else {
@@ -137,6 +143,9 @@ export default function AdminTasksPage() {
                 goalId: '',
                 priority: 'Medium',
                 status: 'Pending',
+                startDate: '',
+                endDate: '',
+                estimatedHours: '',
                 dueDate: ''
             });
         }
@@ -147,12 +156,31 @@ export default function AdminTasksPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Validate date range on frontend
+        if (formData.startDate && formData.endDate) {
+            const start = new Date(formData.startDate);
+            const end = new Date(formData.endDate);
+            if (start > end) {
+                toast.error('Start date must be before end date');
+                return;
+            }
+        }
+
         const url = editingTask ? `/api/admin/tasks/${editingTask._id}` : '/api/admin/tasks';
         const method = editingTask ? 'PATCH' : 'POST';
 
-        // Clean up empty goalId before sending
-        const payload = { ...formData };
-        if (!payload.goalId) delete (payload as any).goalId;
+        // Clean up empty fields before sending
+        const payload: any = { ...formData };
+        if (!payload.goalId) delete payload.goalId;
+        if (!payload.startDate) delete payload.startDate;
+        if (!payload.endDate) delete payload.endDate;
+        if (!payload.estimatedHours) delete payload.estimatedHours;
+
+        // Convert estimatedHours to number if present
+        if (payload.estimatedHours) {
+            payload.estimatedHours = parseFloat(payload.estimatedHours);
+        }
 
         try {
             const res = await fetch(url, {
@@ -511,17 +539,61 @@ export default function AdminTasksPage() {
                                                 <Flag className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                                             </div>
                                         </div>
+                                        {/* This is the div that needs to be closed */}
+                                    </div>
+
+                                    {/* Timeline Section */}
+                                    <div className="space-y-4 pt-2">
+                                        <div className="flex items-center gap-2">
+                                            <Calendar className="w-4 h-4 text-navy-900" />
+                                            <label className="text-sm font-bold text-navy-900">Timeline & Effort</label>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Start Date</label>
+                                                <div className="relative">
+                                                    <input
+                                                        type="date"
+                                                        value={formData.startDate}
+                                                        onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                                                        className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-navy-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-gray-300 font-medium text-sm"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">End Date <span className="text-red-500">*</span></label>
+                                                <div className="relative">
+                                                    <input
+                                                        type="date"
+                                                        required
+                                                        value={formData.endDate}
+                                                        onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                                                        className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-navy-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-gray-300 font-medium text-sm"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+
                                         <div className="space-y-2">
-                                            <label className="text-sm font-bold text-navy-900">Due Date</label>
+                                            <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Estimated Hours</label>
                                             <div className="relative">
                                                 <input
-                                                    type="date"
-                                                    value={formData.dueDate}
-                                                    onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
+                                                    type="number"
+                                                    min="0"
+                                                    step="0.5"
+                                                    value={formData.estimatedHours}
+                                                    onChange={(e) => setFormData({ ...formData, estimatedHours: e.target.value })}
                                                     className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-navy-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-gray-300 font-medium"
+                                                    placeholder="e.g., 8"
                                                 />
-                                                <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                                             </div>
+                                            {formData.startDate && formData.endDate && new Date(formData.startDate) <= new Date(formData.endDate) && (
+                                                <p className="text-xs text-blue-600 font-medium flex items-center gap-1">
+                                                    <Calendar className="w-3 h-3" />
+                                                    Duration: {Math.ceil((new Date(formData.endDate).getTime() - new Date(formData.startDate).getTime()) / (1000 * 60 * 60 * 24))} day(s)
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
 

@@ -53,7 +53,7 @@ export async function POST(req: Request) {
 
         const signature = cloudinary.utils.api_sign_request({
             timestamp: timestamp,
-            folder: folder || 'crm-courses',
+            folder: folder || 'crm-uploads',
         }, apiSecret);
 
         return NextResponse.json({

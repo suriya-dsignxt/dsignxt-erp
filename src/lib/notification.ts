@@ -3,7 +3,7 @@ import Notification from '@/models/Notification';
 
 interface SendNotificationParams {
     recipientId: string;
-    recipientRole: 'ADMIN' | 'EMPLOYEE' | 'STUDENT';
+    recipientRole: 'ADMIN' | 'EMPLOYEE';
     title: string;
     message: string;
     type: string;
