@@ -141,6 +141,19 @@ export default function AdminEmployeeProfileDetail({ params }: { params: Promise
         { header: 'Reason', accessor: 'reason' },
     ];
 
+    // Helper function for AdvancedTable to handle potential function accessors
+    const renderCell = <T extends Record<string, any>>(item: T, column: { accessor: string | ((item: T) => any) }) => {
+        const value = typeof column.accessor === 'function'
+            ? column.accessor(item)
+            : item[column.accessor];
+
+        if (typeof value === 'function') {
+            console.error('AdvancedTable: Accessor returned a function, which is not a valid React child.', value);
+            return 'Invalid Data';
+        }
+        return value;
+    };
+
     return (
         <div className="flex flex-col md:flex-row min-h-screen bg-gray-50">
             <Sidebar />
@@ -263,8 +276,6 @@ export default function AdminEmployeeProfileDetail({ params }: { params: Promise
                                     </button>
                                 )}
                             </div>
-
-                            import {toast} from 'sonner';
 
                             {/* Map data to flat structure required by form */}
                             <EmployeeProfileForm

@@ -4,7 +4,7 @@ import Attendance from '@/models/Attendance';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
 import { logAction } from '@/lib/audit';
-import { sendNotification } from '@/lib/notifications';
+import { sendNotification } from '@/lib/notification';
 import { sendEmail } from '@/lib/email';
 import { EmailTemplates } from '@/lib/email-templates';
 import User from '@/models/User';
@@ -22,20 +22,24 @@ async function getUserInfo() {
         return null;
     }
 }
-
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
-    console.log("Admin Attendance PUT Received"); // Debug
+    console.log("[API DEBUG] Attendance PUT started");
     await dbConnect();
     const userInfo = await getUserInfo();
 
+    console.log(`[API DEBUG] userInfo: ${JSON.stringify(userInfo)}`);
+
     // 1. Strict Admin Check
-    if (!userInfo || userInfo.role !== 'ADMIN') {
+    if (!userInfo || (userInfo.role !== 'ADMIN' && userInfo.role !== 'admin')) {
+        console.warn(`[AUTH] Unauthorized attendance update attempt by ${userInfo?.userId} with role ${userInfo?.role}`);
         return NextResponse.json({ message: 'Unauthorized: Admin access required' }, { status: 403 });
     }
 
     try {
         const { id } = await params;
-        const { status } = await req.json();
+        const body = await req.json();
+        const { status } = body;
+        console.log(`[API DEBUG] ID: ${id}, Status: ${status}`);
 
         if (!['Approved', 'Rejected'].includes(status)) {
             return NextResponse.json({ message: 'Invalid status' }, { status: 400 });
@@ -43,20 +47,14 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
         const record = await Attendance.findById(id);
         if (!record) {
+            console.log(`[API DEBUG] Record not found: ${id}`);
             return NextResponse.json({ message: 'Attendance record not found' }, { status: 404 });
         }
 
-        // 2. Prevent multiple approvals/rejections (Optional strictness, but good for audit)
-        // If we want to allow re-evaluation, we skip this. 
-        // Request says "Prevent multiple approvals", implies once decided it stays? 
-        // Usually Admin might need to correct a mistake. Let's allow update but log it implicitly by overwriting.
-        // Wait, request said "Prevent multiple approvals on same record". 
-        // I will interprete this as: If it's ALREADY Approved, don't re-approve blindly 
-        // or prevent accidental double clicks. But Admins usually need to fix mistakes.
-        // Let's prevent if status is SAME.
-
+        console.log(`[API DEBUG] Current record status: ${record.status}`);
         // Strict "Approve OR Reject only once" rule
         if (record.status !== 'Pending') {
+            console.log(`[API DEBUG] Record already processed: ${record.status}`);
             return NextResponse.json({ message: `Attendance request has already been ${record.status}. Action is final.` }, { status: 400 });
         }
 
@@ -65,24 +63,30 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
         record.approvedAt = new Date();
 
         await record.save();
+        console.log("[API DEBUG] Record saved successfully");
 
-        // Notify Employee
-        console.log(`[AUDIT] Notifying Employee ${record.userId} of Attendance ${status}`);
         // Notify Employee (DB Notification)
-        console.log(`[AUDIT] Notifying Employee ${record.userId} of Attendance ${status}`);
-        await sendNotification(
-            record.userId.toString(),
-            `Attendance ${status}`,
-            `Your attendance for ${new Date(record.date).toLocaleDateString()} has been ${status}.`,
-            status === 'Approved' ? 'ATTENDANCE_APPROVED' : 'ATTENDANCE_REJECTED',
-            '/employee/attendance'
-        );
+        try {
+            console.log(`[API DEBUG] Sending DB notification to ${record.userId}`);
+            await sendNotification({
+                recipientId: record.userId.toString(),
+                recipientRole: 'EMPLOYEE',
+                title: `Attendance ${status}`,
+                message: `Your attendance for ${new Date(record.date).toLocaleDateString()} has been ${status}.`,
+                type: status === 'Approved' ? 'ATTENDANCE_APPROVED' : 'ATTENDANCE_REJECTED',
+                entityType: 'Attendance',
+                entityId: id
+            });
+            console.log("[API DEBUG] DB notification sent");
+        } catch (notifierError: any) {
+            console.error("[API DEBUG] Notification failed", notifierError);
+        }
 
         // Notify Employee (Email)
-        // Fetch user email first since it might not be in record
-        const employeeUser = await User.findById(record.userId).select('email name');
-        if (employeeUser && employeeUser.email) {
-            try {
+        try {
+            const employeeUser = await User.findById(record.userId).select('email name');
+            if (employeeUser && employeeUser.email) {
+                console.log(`[API DEBUG] Sending email to ${employeeUser.email}`);
                 await sendEmail({
                     to: employeeUser.email,
                     subject: `⏱️ Attendance Update: ${status}`,
@@ -92,24 +96,32 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
                         employeeUser.name
                     )
                 });
-            } catch (error) {
-                console.error(`[EMAIL ERROR] Failed to send attendance email to ${employeeUser.email}`, error);
+                console.log("[API DEBUG] Email sent");
             }
+        } catch (error) {
+            console.error(`[EMAIL ERROR] Failed to send attendance email`, error);
         }
 
         // Audit Log
-        await logAction({
-            action: status === 'Approved' ? 'ATTENDANCE_APPROVED' : 'ATTENDANCE_REJECTED',
-            entityType: 'Attendance',
-            entityId: id,
-            performedBy: userInfo.userId as string,
-            role: 'ADMIN',
-            metadata: { originalStatus: record.status, newStatus: status }
-        });
+        try {
+            console.log("[API DEBUG] Logging action to AuditLog");
+            await logAction({
+                action: status === 'Approved' ? 'ATTENDANCE_APPROVED' : 'ATTENDANCE_REJECTED',
+                entityType: 'Attendance',
+                entityId: id,
+                performedBy: userInfo.userId as string,
+                role: 'ADMIN',
+                metadata: { originalStatus: 'Pending', newStatus: status }
+            });
+            console.log("[API DEBUG] Audit log complete");
+        } catch (auditError) {
+            console.error("[API DEBUG] Audit logging failed", auditError);
+        }
 
         return NextResponse.json({ message: `Attendance ${status} successfully`, record });
 
     } catch (err: any) {
+        console.error("[API DEBUG] Catch block triggered", err);
         return NextResponse.json({ message: err.message }, { status: 500 });
     }
 }

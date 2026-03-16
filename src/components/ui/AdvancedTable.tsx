@@ -21,6 +21,7 @@ interface AdvancedTableProps<T> {
     title?: string; // Optional title above table
     searchPlaceholder?: string;
     renderGridLayout?: (item: T) => React.ReactNode;
+    initialViewMode?: 'list' | 'grid';
 }
 
 export default function AdvancedTable<T extends Record<string, any>>({
@@ -32,7 +33,8 @@ export default function AdvancedTable<T extends Record<string, any>>({
     isLoading = false,
     title,
     searchPlaceholder = "Search...",
-    renderGridLayout
+    renderGridLayout,
+    initialViewMode = 'list'
 }: AdvancedTableProps<T>) {
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
@@ -42,7 +44,7 @@ export default function AdvancedTable<T extends Record<string, any>>({
         direction: 'asc'
     });
     const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
-    const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+    const [viewMode, setViewMode] = useState<'list' | 'grid'>(initialViewMode);
 
     // 1. Filter Data
     const filteredData = useMemo(() => {
@@ -108,10 +110,15 @@ export default function AdvancedTable<T extends Record<string, any>>({
     };
 
     const renderCell = (item: T, column: Column<T>) => {
-        if (typeof column.accessor === 'function') {
-            return column.accessor(item);
+        const value = typeof column.accessor === 'function'
+            ? column.accessor(item)
+            : item[column.accessor];
+
+        if (typeof value === 'function') {
+            console.error('AdvancedTable: Accessor returned a function for column.', value);
+            return 'Invalid Data';
         }
-        return item[column.accessor];
+        return value;
     };
 
     if (isLoading) {

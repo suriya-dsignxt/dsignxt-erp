@@ -16,7 +16,8 @@ import {
     addMonths,
     subMonths
 } from 'date-fns';
-import { ChevronLeft, ChevronRight, X, User, CheckCircle, XCircle, Clock, Calendar as CalendarIcon, Filter } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X, User, CheckCircle, XCircle, Clock, Calendar as CalendarIcon, Filter, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function AdminAttendance() {
     const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -24,6 +25,7 @@ export default function AdminAttendance() {
     const [loading, setLoading] = useState(true);
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [dayRecords, setDayRecords] = useState<any[]>([]);
+    const [actionId, setActionId] = useState<string | null>(null);
 
     useEffect(() => {
         fetchAttendance();
@@ -32,13 +34,13 @@ export default function AdminAttendance() {
     const fetchAttendance = async () => {
         setLoading(true);
         try {
-            const res = await fetch('/api/admin/attendance');
+            const res = await fetch(`/api/admin/attendance?t=${Date.now()}`, { cache: 'no-store' });
             const data = await res.json();
             if (data.attendance) {
                 setAttendanceData(data.attendance);
             }
         } catch (e) {
-            console.error(e);
+            console.error("Fetch attendance failed", e);
         } finally {
             setLoading(false);
         }
@@ -70,23 +72,42 @@ export default function AdminAttendance() {
     };
 
     const handleUpdateStatus = async (id: string, action: 'approve' | 'reject') => {
-        if (!confirm(`Are you sure you want to ${action} this attendance record?`)) return;
+        setActionId(id + action); // Set loading state for this specific button
+        const updatedStatus = action === 'approve' ? 'Approved' : 'Rejected';
+        
+        // Optimistic UI Update
+        const previousRecords = [...dayRecords];
+        const previousAttendance = [...attendanceData];
+        
+        setDayRecords(prev => prev.map(r => r._id === id ? { ...r, status: updatedStatus } : r));
+        setAttendanceData(prev => prev.map(r => r._id === id ? { ...r, status: updatedStatus } : r));
 
-        try {
-            const res = await fetch(`/api/admin/attendance/${id}/${action}`, { method: 'PATCH' });
-            if (res.ok) {
-                // Refresh data
-                await fetchAttendance();
-                // Close modal or update local state (for now, simply closing to force refresh view)
-                setSelectedDate(null);
-                alert(`Attendance ${action}d successfully`);
-            } else {
-                alert('Failed to update status');
+        toast.promise(async () => {
+            const res = await fetch(`/api/admin/attendance/${id}/status`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: updatedStatus })
+            });
+
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}));
+                throw new Error(errorData.message || 'Failed to update status');
             }
-        } catch (error) {
-            console.error(error);
-            alert('Error updating status');
-        }
+            await fetchAttendance();
+            return `Attendance ${action}d successfully`;
+        }, {
+            loading: `Processing ${action}...`,
+            success: (data) => {
+                setActionId(null);
+                return data;
+            },
+            error: (err) => {
+                setActionId(null);
+                setDayRecords(previousRecords);
+                setAttendanceData(previousAttendance);
+                return `Error: ${err.message}`;
+            },
+        });
     };
 
     return (
@@ -276,18 +297,22 @@ export default function AdminAttendance() {
                                                                 e.stopPropagation();
                                                                 handleUpdateStatus(record._id, 'approve');
                                                             }}
-                                                            className="flex-1 py-2 rounded-xl bg-green-50 hover:bg-green-100 text-green-700 font-bold text-sm transition-colors flex items-center justify-center gap-2 border border-green-200"
+                                                            disabled={actionId === record._id + 'approve'}
+                                                            className="flex-1 py-2 rounded-xl bg-green-50 hover:bg-green-100 text-green-700 font-bold text-sm transition-colors flex items-center justify-center gap-2 border border-green-200 disabled:opacity-50"
                                                         >
-                                                            <CheckCircle size={16} /> Approve
+                                                            {actionId === record._id + 'approve' ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />} 
+                                                            Approve
                                                         </button>
                                                         <button
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 handleUpdateStatus(record._id, 'reject');
                                                             }}
-                                                            className="flex-1 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 font-bold text-sm transition-colors flex items-center justify-center gap-2 border border-red-200"
+                                                            disabled={actionId === record._id + 'reject'}
+                                                            className="flex-1 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 font-bold text-sm transition-colors flex items-center justify-center gap-2 border border-red-200 disabled:opacity-50"
                                                         >
-                                                            <XCircle size={16} /> Reject
+                                                            {actionId === record._id + 'reject' ? <Loader2 size={16} className="animate-spin" /> : <XCircle size={16} />}
+                                                            Reject
                                                         </button>
                                                     </div>
                                                 )}

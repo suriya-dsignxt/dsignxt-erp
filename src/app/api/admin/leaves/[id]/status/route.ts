@@ -27,13 +27,15 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     await dbConnect();
     const userInfo = await getUserInfo();
 
-    if (!userInfo || userInfo.role !== 'ADMIN') {
+    if (!userInfo || userInfo.role !== 'ADMIN' && userInfo.role !== 'admin') {
+        console.warn(`[AUTH] Unauthorized leave update attempt by ${userInfo?.userId} with role ${userInfo?.role}`);
         return NextResponse.json({ message: 'Unauthorized: Admin access required' }, { status: 403 });
     }
 
     try {
         const { id } = await params;
         const { status } = await req.json();
+        console.log(`[ACTION] Leave ${status} for ${id} by ${userInfo.userId}`);
 
         if (!['Approved', 'Rejected'].includes(status)) {
             return NextResponse.json({ message: 'Invalid status' }, { status: 400 });
@@ -92,7 +94,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
                     subject: `Leave Request ${status} 📅`,
                     html: EmailTemplates.leaveStatus(
                         user.name,
-                        leave.type,
+                        leave.leaveType,
                         `${new Date(leave.fromDate).toLocaleDateString()} - ${new Date(leave.toDate).toLocaleDateString()}`,
                         status,
                         userInfo.role // or get Admin name if available

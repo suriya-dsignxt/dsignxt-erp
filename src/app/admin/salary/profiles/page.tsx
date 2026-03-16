@@ -92,13 +92,13 @@ export default function SalaryProfiles() {
                                 <div className="p-6 flex items-start justify-between relative">
                                     <div className="flex items-center gap-4 relative z-10">
                                         <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-100 to-white border border-indigo-50 flex items-center justify-center text-indigo-700 font-bold shadow-sm">
-                                            {emp.name.charAt(0)}
+                                            {emp.name?.charAt(0) || '?'}
                                         </div>
                                         <div>
                                             <h3 className="font-bold text-navy-900 leading-tight group-hover:text-indigo-600 transition-colors">
-                                                {emp.name}
+                                                {emp.name || 'Unknown'}
                                             </h3>
-                                            <p className="text-xs text-gray-500 font-semibold uppercase tracking-wide mt-0.5">{emp.role}</p>
+                                            <p className="text-xs text-gray-500 font-semibold uppercase tracking-wide mt-0.5">{emp.role || 'No Role'}</p>
                                         </div>
                                     </div>
                                     {emp.salaryProfile && (
@@ -163,7 +163,7 @@ export default function SalaryProfiles() {
                             <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-gray-50 to-white">
                                 <div>
                                     <h2 className="text-xl font-black text-navy-900 tracking-tight">Compensation</h2>
-                                    <p className="text-xs text-gray-500 font-medium mt-1">Configure salary for <span className="text-indigo-600">{selectedEmp.name}</span></p>
+                                    <p className="text-xs text-gray-500 font-medium mt-1">Configure salary for <span className="text-indigo-600">{selectedEmp?.name || 'Unknown'}</span></p>
                                 </div>
                                 <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-full transition-colors">
                                     <X size={20} />

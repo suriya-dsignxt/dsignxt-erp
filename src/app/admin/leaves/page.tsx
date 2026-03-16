@@ -5,7 +5,8 @@ import Sidebar from '@/components/Sidebar';
 import AdvancedTable from '@/components/ui/AdvancedTable';
 import ModernGlassCard from '@/components/ui/ModernGlassCard';
 import PageHeader from '@/components/ui/PageHeader';
-import { CheckCircle, XCircle, Clock, Calendar, FileText, Check, X, AlertCircle } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, Calendar, FileText, Check, X, AlertCircle, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function AdminLeaves() {
     const [leaves, setLeaves] = useState<any[]>([]);
@@ -19,37 +20,48 @@ export default function AdminLeaves() {
 
     const fetchLeaves = async () => {
         try {
-            const res = await fetch('/api/admin/leaves');
+            const res = await fetch(`/api/admin/leaves?t=${Date.now()}`, { cache: 'no-store' });
             const data = await res.json();
             if (data.leaves) setLeaves(data.leaves);
         } catch (e) {
-            console.error(e);
+            console.error("Fetch leaves failed", e);
         } finally {
             setLoading(false);
         }
     };
 
     const handleStatusUpdate = async (id: string, status: 'Approved' | 'Rejected') => {
-        if (!window.confirm(`Are you sure you want to ${status} this request?`)) return;
+        setActionLoading(id + status);
+        const previousLeaves = [...leaves];
+        
+        // Optimistic UI Update
+        setLeaves(prev => prev.map(l => l._id === id ? { ...l, status } : l));
 
-        setActionLoading(id);
-        try {
+        toast.promise(async () => {
             const res = await fetch(`/api/admin/leaves/${id}/status`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status })
             });
 
-            if (res.ok) {
-                await fetchLeaves();
-            } else {
-                alert('Failed to update status');
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}));
+                throw new Error(errorData.message || 'Failed to update status');
             }
-        } catch (e) {
-            alert('Network error');
-        } finally {
-            setActionLoading(null);
-        }
+            await fetchLeaves();
+            return `Leave request ${status} successfully`;
+        }, {
+            loading: `Updating status to ${status}...`,
+            success: (data) => {
+                setActionLoading(null);
+                return data;
+            },
+            error: (err) => {
+                setActionLoading(null);
+                setLeaves(previousLeaves);
+                return `Error: ${err.message}`;
+            }
+        });
     };
 
     // Derived Data for Summary
@@ -143,19 +155,19 @@ export default function AdminLeaves() {
                     <div className="flex gap-2">
                         <button
                             onClick={() => handleStatusUpdate(item._id, 'Approved')}
-                            disabled={actionLoading === item._id}
+                            disabled={actionLoading === item._id + 'Approved'}
                             className="p-2 bg-green-50 text-green-600 hover:bg-green-100 hover:text-green-700 rounded-lg transition-all shadow-sm border border-green-100 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:scale-100"
                             title="Approve Request"
                         >
-                            <Check size={16} strokeWidth={3} />
+                            {actionLoading === item._id + 'Approved' ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} strokeWidth={3} />}
                         </button>
                         <button
                             onClick={() => handleStatusUpdate(item._id, 'Rejected')}
-                            disabled={actionLoading === item._id}
+                            disabled={actionLoading === item._id + 'Rejected'}
                             className="p-2 bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 rounded-lg transition-all shadow-sm border border-red-100 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:scale-100"
                             title="Reject Request"
                         >
-                            <X size={16} strokeWidth={3} />
+                            {actionLoading === item._id + 'Rejected' ? <Loader2 size={16} className="animate-spin" /> : <X size={16} strokeWidth={3} />}
                         </button>
                     </div>
                 );
@@ -234,7 +246,6 @@ export default function AdminLeaves() {
                         keyField="_id"
                         isLoading={loading}
                         searchPlaceholder="Search requests..."
-                        rowsPerPage={10}
                     />
                 </ModernGlassCard>
             </main>
