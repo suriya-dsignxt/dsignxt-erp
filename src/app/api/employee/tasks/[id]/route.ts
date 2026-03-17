@@ -31,7 +31,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         }
 
         const body = await req.json();
-        const { status, progressPercentage } = body;
+        const { status, progressPercentage, employeeEstimatedDeadline, attachment } = body;
 
         // Security: Fetch task and check ownership
         const task = await Task.findById(id);
@@ -51,6 +51,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         const previousStatus = task.status;
         task.status = status || task.status;
         task.progressPercentage = progressPercentage !== undefined ? progressPercentage : task.progressPercentage;
+        if (employeeEstimatedDeadline) task.employeeEstimatedDeadline = new Date(employeeEstimatedDeadline);
+        if (attachment) task.attachments.push(attachment);
 
         await task.save();
 

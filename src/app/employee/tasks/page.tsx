@@ -12,7 +12,10 @@ import {
     Calendar,
     Target,
     MessageSquare,
-    X
+    X,
+    Upload,
+    FileText,
+    History
 } from 'lucide-react';
 import ModernGlassCard from '@/components/ui/ModernGlassCard';
 import { cn } from '@/lib/utils';
@@ -42,6 +45,13 @@ interface Task {
     completedAt?: string;
     createdAt: string;
     dueDate?: string;
+    employeeEstimatedDeadline?: string;
+    attachments: Array<{
+        filename: string;
+        url: string;
+        uploadedAt: string;
+        uploadedBy: string;
+    }>;
 }
 
 export default function EmployeeTasksPage() {
@@ -51,6 +61,7 @@ export default function EmployeeTasksPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
     const [currentUserEmail, setCurrentUserEmail] = useState<string>(''); // For highlighting own comments
+    const [isUploading, setIsUploading] = useState<string | null>(null);
 
     useEffect(() => {
         fetchTasks();
@@ -71,18 +82,6 @@ export default function EmployeeTasksPage() {
         } finally {
             setIsLoading(false);
         }
-    };
-
-    const handleProgressChange = async (taskId: string, newProgress: number) => {
-        setTasks(prev => prev.map(t =>
-            t._id === taskId ? { ...t, progressPercentage: newProgress, status: newProgress > 0 ? 'In Progress' : 'Pending' } : t
-        ));
-
-        // Optimistic update handled; debounced API call would be implemented here in a real-world scenario
-        // For distinct actions like this, we'll trigger the update immediately on "mouse up" or specialized event, 
-        // but for range inputs, we usually wait. 
-        // Here, we'll simple trigger the update directly since we don't have the sophisticated debounce hooked up to the fetch loop yet.
-        await updateTask(taskId, { progressPercentage: newProgress, status: 'In Progress' });
     };
 
     const updateTask = async (taskId: string, payload: any) => {
@@ -123,6 +122,44 @@ export default function EmployeeTasksPage() {
                 next.delete(taskId);
                 return next;
             });
+        }
+    };
+
+    const handleFileUpload = async (taskId: string, file: File) => {
+        if (file.size > 2 * 1024 * 1024) {
+            alert('File too large (Max 2MB)');
+            return;
+        }
+
+        setIsUploading(taskId);
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const res = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                const attachment = {
+                    filename: data.filename,
+                    url: data.url,
+                    uploadedAt: new Date().toISOString(),
+                    uploadedBy: currentUserEmail
+                };
+
+                await updateTask(taskId, { attachment });
+                fetchTasks(); // Refresh to show attachment
+            } else {
+                alert(data.message || 'Upload failed');
+            }
+        } catch (error) {
+            console.error('Upload error:', error);
+            alert('An error occurred during upload');
+        } finally {
+            setIsUploading(null);
         }
     };
 
@@ -242,19 +279,70 @@ export default function EmployeeTasksPage() {
                                                         )}
                                                     </div>
 
-                                                    <div className="pt-4 space-y-3">
-                                                        <div className="flex justify-between text-xs font-semibold text-gray-500">
-                                                            <span>Progress</span>
-                                                            <span className="text-navy-900">{Math.round(task.progressPercentage)}%</span>
+                                                    <div className="pt-4 space-y-4">
+                                                        {/* Deadline Declaration */}
+                                                        <div className="space-y-1.5">
+                                                            <div className="flex justify-between items-center">
+                                                                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">My Commitment Deadline</label>
+                                                                {task.employeeEstimatedDeadline && (
+                                                                    <span className="text-[10px] text-blue-600 font-bold">Set</span>
+                                                                )}
+                                                            </div>
+                                                            <input
+                                                                type="datetime-local"
+                                                                value={task.employeeEstimatedDeadline ? new Date(task.employeeEstimatedDeadline).toISOString().slice(0, 16) : ''}
+                                                                onChange={(e) => updateTask(task._id, { employeeEstimatedDeadline: e.target.value })}
+                                                                className="w-full bg-white/50 border border-gray-200 rounded-lg px-3 py-2 text-xs text-navy-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                                                            />
                                                         </div>
-                                                        <input
-                                                            type="range"
-                                                            min="0"
-                                                            max="99" // Prevent full completion via slider
-                                                            value={task.progressPercentage}
-                                                            onChange={(e) => handleProgressChange(task._id, parseInt(e.target.value))}
-                                                            className="w-full h-1.5 bg-gray-200 rounded-full appearance-none cursor-pointer accent-navy-900 hover:accent-navy-800 transition-all"
-                                                        />
+
+                                                        {/* Attachments Section */}
+                                                        <div className="space-y-2">
+                                                            <div className="flex justify-between items-center">
+                                                                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Attachments</label>
+                                                                <label className="cursor-pointer group">
+                                                                    <input
+                                                                        type="file"
+                                                                        className="hidden"
+                                                                        onChange={(e) => {
+                                                                            const file = e.target.files?.[0];
+                                                                            if (file) handleFileUpload(task._id, file);
+                                                                        }}
+                                                                        disabled={isUploading === task._id}
+                                                                    />
+                                                                    <div className="flex items-center gap-1 text-[10px] text-blue-600 font-bold hover:text-blue-700">
+                                                                        {isUploading === task._id ? (
+                                                                            <Loader2 className="w-3 h-3 animate-spin" />
+                                                                        ) : (
+                                                                            <Upload className="w-3 h-3" />
+                                                                        )}
+                                                                        Add File
+                                                                    </div>
+                                                                </label>
+                                                            </div>
+                                                            
+                                                            {task.attachments && task.attachments.length > 0 ? (
+                                                                <div className="flex flex-wrap gap-2">
+                                                                    {task.attachments.slice(-3).map((att, idx) => (
+                                                                        <a
+                                                                            key={idx}
+                                                                            href={att.url}
+                                                                            target="_blank"
+                                                                            rel="noopener noreferrer"
+                                                                            className="flex items-center gap-2 px-2 py-1 bg-gray-100 rounded-md border border-gray-200 text-[10px] text-gray-600 hover:bg-gray-200 transition-colors max-w-[150px]"
+                                                                        >
+                                                                            <FileText className="w-3 h-3 flex-shrink-0" />
+                                                                            <span className="truncate">{att.filename}</span>
+                                                                        </a>
+                                                                    ))}
+                                                                    {task.attachments.length > 3 && (
+                                                                        <span className="text-[10px] text-gray-400">+{task.attachments.length - 3} more</span>
+                                                                    )}
+                                                                </div>
+                                                            ) : (
+                                                                <p className="text-[10px] text-gray-400 italic">No files uploaded</p>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 </div>
 

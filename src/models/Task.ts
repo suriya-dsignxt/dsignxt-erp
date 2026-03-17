@@ -60,6 +60,16 @@ const TaskSchema = new mongoose.Schema(
             type: Date,
             required: false,
         },
+        employeeEstimatedDeadline: {
+            type: Date,
+            required: false,
+        },
+        attachments: [{
+            filename: String,
+            url: String, // Stringified base64 or path
+            uploadedAt: { type: Date, default: Date.now },
+            uploadedBy: String // Email or User ID
+        }],
         completedAt: {
             type: Date,
             default: null,

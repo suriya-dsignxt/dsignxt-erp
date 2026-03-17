@@ -17,7 +17,10 @@ import {
     Search,
     ArrowUpRight,
     MessageSquare,
-    Loader2
+    Loader2,
+    Upload,
+    FileText,
+    Clock
 } from 'lucide-react';
 import ModernGlassCard from '@/components/ui/ModernGlassCard';
 import { cn } from '@/lib/utils';
@@ -42,6 +45,13 @@ interface Task {
     status: 'Pending' | 'In Progress' | 'Completed';
     createdAt: string;
     dueDate?: string;
+    employeeEstimatedDeadline?: string;
+    attachments?: Array<{
+        filename: string;
+        url: string;
+        uploadedAt: string;
+        uploadedBy: string;
+    }>;
 }
 
 interface User {
@@ -77,8 +87,10 @@ export default function AdminTasksPage() {
         startDate: '',
         endDate: '',
         estimatedHours: '',
-        dueDate: ''
+        dueDate: '',
+        employeeEstimatedDeadline: ''
     });
+    const [isUploading, setIsUploading] = useState<string | null>(null);
 
     useEffect(() => {
         fetchData();
@@ -132,7 +144,8 @@ export default function AdminTasksPage() {
                 startDate: (task as any).startDate ? new Date((task as any).startDate).toISOString().split('T')[0] : '',
                 endDate: (task as any).endDate ? new Date((task as any).endDate).toISOString().split('T')[0] : '',
                 estimatedHours: (task as any).estimatedHours?.toString() || '',
-                dueDate: task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : ''
+                dueDate: task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : '',
+                employeeEstimatedDeadline: task.employeeEstimatedDeadline ? new Date(task.employeeEstimatedDeadline).toISOString().slice(0, 16) : ''
             });
         } else {
             setEditingTask(null);
@@ -146,7 +159,8 @@ export default function AdminTasksPage() {
                 startDate: '',
                 endDate: '',
                 estimatedHours: '',
-                dueDate: ''
+                dueDate: '',
+                employeeEstimatedDeadline: ''
             });
         }
         setIsModalOpen(true);
@@ -309,6 +323,7 @@ export default function AdminTasksPage() {
                                             <th className="px-6 py-4 text-sm font-bold text-gray-600 uppercase tracking-wider">Due Date</th>
                                             <th className="px-6 py-4 text-sm font-bold text-gray-600 uppercase tracking-wider">Goal Context</th>
                                             <th className="px-6 py-4 text-sm font-bold text-gray-600 uppercase tracking-wider">Status</th>
+                                            <th className="px-6 py-4 text-sm font-bold text-gray-600 uppercase tracking-wider">Attachments</th>
                                             <th className="px-6 py-4 text-sm font-bold text-gray-600 uppercase tracking-wider text-right">Actions</th>
                                         </tr>
                                     </thead>
@@ -368,6 +383,30 @@ export default function AdminTasksPage() {
                                                         )}>
                                                             {task.status}
                                                         </span>
+                                                        {task.employeeEstimatedDeadline && (
+                                                            <div className="flex items-center gap-1 mt-1 text-[10px] font-bold text-blue-600">
+                                                                <Clock className="w-3 h-3" />
+                                                                Est: {new Date(task.employeeEstimatedDeadline).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
+                                                            </div>
+                                                        )}
+                                                    </td>
+                                                    <td className="px-6 py-6">
+                                                        {task.attachments && task.attachments.length > 0 ? (
+                                                            <div className="flex -space-x-2">
+                                                                {task.attachments.slice(0, 3).map((att, i) => (
+                                                                    <div key={i} title={att.filename} className="w-7 h-7 rounded-lg bg-gray-100 border border-white flex items-center justify-center text-gray-500 shadow-sm">
+                                                                        <FileText size={14} />
+                                                                    </div>
+                                                                ))}
+                                                                {task.attachments.length > 3 && (
+                                                                    <div className="w-7 h-7 rounded-lg bg-navy-900 text-white text-[10px] flex items-center justify-center font-bold border border-white shadow-sm">
+                                                                        +{task.attachments.length - 3}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        ) : (
+                                                            <span className="text-xs text-gray-300">None</span>
+                                                        )}
                                                     </td>
                                                     <td className="px-6 py-6 text-right">
                                                         <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -595,6 +634,71 @@ export default function AdminTasksPage() {
                                                 </p>
                                             )}
                                         </div>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between items-center">
+                                            <label className="text-sm font-bold text-navy-900 uppercase tracking-wider">Attachments</label>
+                                            <label className="cursor-pointer">
+                                                <input
+                                                    type="file"
+                                                    className="hidden"
+                                                    onChange={async (e) => {
+                                                        const file = e.target.files?.[0];
+                                                        if (file && editingTask) {
+                                                            if (file.size > 2 * 1024 * 1024) {
+                                                                toast.error('File too large (Max 2MB)');
+                                                                return;
+                                                            }
+                                                            setIsUploading(editingTask._id);
+                                                            const formData = new FormData();
+                                                            formData.append('file', file);
+                                                            try {
+                                                                const upRes = await fetch('/api/upload', { method: 'POST', body: formData });
+                                                                const upData = await upRes.json();
+                                                                if (upRes.ok) {
+                                                                    const attachment = {
+                                                                        filename: upData.filename,
+                                                                        url: upData.url,
+                                                                        uploadedAt: new Date().toISOString(),
+                                                                        uploadedBy: 'Admin'
+                                                                    };
+                                                                    await fetch(`/api/admin/tasks/${editingTask._id}`, {
+                                                                        method: 'PATCH',
+                                                                        headers: { 'Content-Type': 'application/json' },
+                                                                        body: JSON.stringify({ attachments: [...(editingTask.attachments || []), attachment] })
+                                                                    });
+                                                                    fetchData();
+                                                                    toast.success('File uploaded');
+                                                                }
+                                                            } catch (err) { toast.error('Upload failed'); }
+                                                            finally { setIsUploading(null); }
+                                                        }
+                                                    }}
+                                                />
+                                                <span className="text-xs text-blue-600 font-bold flex items-center gap-1">
+                                                    {isUploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Upload className="w-3 h-3" />}
+                                                    Add Attachment
+                                                </span>
+                                            </label>
+                                        </div>
+                                        {editingTask?.attachments && editingTask.attachments.length > 0 ? (
+                                            <div className="grid grid-cols-2 gap-2">
+                                                {editingTask.attachments.map((att, i) => (
+                                                    <a key={i} href={att.url} target="_blank" rel="noopener noreferrer" className="p-3 bg-gray-50 border border-gray-100 rounded-xl flex items-center gap-3 hover:bg-gray-100 transition-all group">
+                                                        <div className="p-2 bg-white rounded-lg text-gray-400 group-hover:text-blue-500">
+                                                            <FileText size={16} />
+                                                        </div>
+                                                        <div className="flex flex-col min-w-0">
+                                                            <span className="text-xs font-bold text-navy-900 truncate">{att.filename}</span>
+                                                            <span className="text-[10px] text-gray-400">by {att.uploadedBy}</span>
+                                                        </div>
+                                                    </a>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <p className="text-xs text-gray-400 italic bg-gray-50 p-4 rounded-xl border border-dashed border-gray-200 text-center">No attachments yet</p>
+                                        )}
                                     </div>
 
                                     <div className="space-y-2">

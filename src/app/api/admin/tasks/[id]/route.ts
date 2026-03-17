@@ -32,7 +32,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         }
 
         const body = await req.json();
-        const { title, description, assignedTo, goalId, priority, status, dueDate } = body;
+        const { title, description, assignedTo, goalId, priority, status, dueDate, employeeEstimatedDeadline, attachments } = body;
 
         // Validation: If assignedTo is being changed, ensure it's still an Employee
         if (assignedTo) {
@@ -70,7 +70,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
                 goalId,
                 priority,
                 status,
-                dueDate: dueDate ? new Date(dueDate) : undefined
+                dueDate: dueDate ? new Date(dueDate) : undefined,
+                employeeEstimatedDeadline: employeeEstimatedDeadline ? new Date(employeeEstimatedDeadline) : undefined,
+                attachments
             },
             { new: true }
         ).populate('assignedTo', 'name email').populate('goalId', 'title');
