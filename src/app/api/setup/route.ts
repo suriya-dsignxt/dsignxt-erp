@@ -16,7 +16,7 @@ export async function GET() {
     const hashedPassword = await hashPassword('admin123');
     const admin = await User.create({
         name: 'System Admin',
-        email: 'admin@promptix.com',
+        email: 'admin@dsignxt.com',
         password: hashedPassword,
         role: 'ADMIN',
     });

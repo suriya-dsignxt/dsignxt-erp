@@ -74,7 +74,7 @@ export function generateSalarySlipPDF(salaryData: SalaryData) {
             ['Paid Leave Days', salaryData.paidLeaveDays.toString()],
             ['Unpaid Leave Days', salaryData.unpaidLeaveDays.toString()],
             ['Total Paid Days', (salaryData.presentDays + salaryData.paidLeaveDays).toString()],
-            ['Per Day Rate', `$${salaryData.perDayRate.toFixed(2)}`],
+            ['Per Day Rate', `₹${salaryData.perDayRate.toFixed(2)}`],
         ],
         theme: 'striped',
         headStyles: {
@@ -101,7 +101,7 @@ export function generateSalarySlipPDF(salaryData: SalaryData) {
     doc.setFont('helvetica', 'bold');
     doc.text('Total Salary:', 25, finalY + 10);
     doc.setTextColor(22, 163, 74); // Green-600
-    doc.text(`$${salaryData.calculatedSalary.toLocaleString()}`, 185, finalY + 10, { align: 'right' });
+    doc.text(`₹${salaryData.calculatedSalary.toLocaleString()}`, 185, finalY + 10, { align: 'right' });
     doc.setTextColor(0, 0, 0);
 
     // Payment Details (if paid)

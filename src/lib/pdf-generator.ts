@@ -23,7 +23,7 @@ export const generateSalarySlip = (data: SalarySlipData) => {
     const doc = new jsPDF();
 
     // -- Header --
-    doc.setFillColor(255, 140, 0); // Orange (PromptiX Brand)
+    doc.setFillColor(255, 140, 0); // Orange (Dsignxt Brand)
     doc.rect(0, 0, 210, 40, 'F');
 
     doc.setTextColor(255, 255, 255);

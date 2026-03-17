@@ -121,7 +121,7 @@ export async function POST(req: Request) {
             const employee = await User.findById(userId).select('name');
             if (employee) {
                 await sendEmail({
-                    to: process.env.ADMIN_EMAIL || 'infopromptix@gmail.com',
+                    to: process.env.ADMIN_EMAIL || 'support@dsignxt.com',
                     subject: `🚨 New Leave Request: ${employee.name}`,
                     html: EmailTemplates.adminLeaveRequestAlert(
                         employee.name,

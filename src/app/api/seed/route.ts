@@ -8,9 +8,9 @@ export async function GET() {
         await dbConnect();
 
         // Check if admin already exists
-        const existingAdmin = await User.findOne({ email: 'admin@promptix.com' });
+        const existingAdmin = await User.findOne({ email: 'admin@dsignxt.com' });
         if (existingAdmin) {
-            return NextResponse.json({ message: 'Admin already exists', email: 'admin@promptix.com' });
+            return NextResponse.json({ message: 'Admin already exists', email: 'admin@dsignxt.com' });
         }
 
         // Create new Admin
@@ -18,7 +18,7 @@ export async function GET() {
 
         const newAdmin = await User.create({
             name: 'Super Admin',
-            email: 'admin@promptix.com',
+            email: 'admin@dsignxt.com',
             password: hashedPassword,
             role: 'ADMIN',
             status: 'Active',

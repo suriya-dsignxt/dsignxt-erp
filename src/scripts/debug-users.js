@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const MONGODB_URI = 'mongodb+srv://infopromptix_db_user:SvexHPm0LJcTdwo5@promptixadmin.vajvprn.mongodb.net/?appName=Promptixadmin';
+const MONGODB_URI = 'mongodb+srv://dsignxt_db_user:password@cluster.mongodb.net/?appName=Dsignxt';
 
 async function listUsers() {
     try {

@@ -1,7 +1,7 @@
 const fs = require('fs');
 
 async function testExport() {
-    const adminEmail = 'admin@promptix.com';
+    const adminEmail = 'admin@dsignxt.com';
     const adminPassword = 'admin123';
     const baseUrl = 'http://localhost:3000';
 

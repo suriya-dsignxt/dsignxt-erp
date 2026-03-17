@@ -6,7 +6,7 @@ test.describe('Authentication Flow', () => {
         await page.goto('/login');
 
         // Fill in credentials for the seeded test admin
-        await page.locator('input[type="email"]').fill('test_admin@promptix.com');
+        await page.locator('input[type="email"]').fill('test_admin@dsignxt.com');
         await page.locator('input[type="password"]').fill('TestAdmin123!');
 
         // Click login button

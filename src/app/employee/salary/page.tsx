@@ -114,12 +114,12 @@ export default function MySalary() {
                                             {rec.presentDays > 0 && <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded border border-green-100">{rec.presentDays} Days Present</span>}
                                         </div>
                                         <div className="text-3xl font-black text-navy-900 tracking-tight flex items-baseline gap-1">
-                                            <span className="text-lg text-gray-400 font-bold">$</span>
+                                            <span className="text-lg text-gray-400 font-bold">₹</span>
                                             {rec.calculatedSalary.toLocaleString()}
                                         </div>
                                         <div className="text-xs text-gray-500 mt-1 flex items-center gap-1">
                                             <TrendingUp size={12} className="text-blue-500" />
-                                            Rate: <span className="font-bold text-navy-700">${rec.perDayRate}/day</span>
+                                            Rate: <span className="font-bold text-navy-700">₹{rec.perDayRate}/day</span>
                                         </div>
                                     </div>
 
@@ -182,7 +182,7 @@ export default function MySalary() {
                                             </span>
                                         </div>
                                         <div className="text-xs text-gray-500 mt-2">
-                                            {((rec.halfDays ? rec.presentDays - rec.halfDays : rec.presentDays) + (rec.halfDays || 0) * 0.5 + (rec.paidLeaveDays || 0)).toFixed(1)} days × ${rec.perDayRate}/day = ${rec.calculatedSalary.toLocaleString()}
+                                            {((rec.halfDays ? rec.presentDays - rec.halfDays : rec.presentDays) + (rec.halfDays || 0) * 0.5 + (rec.paidLeaveDays || 0)).toFixed(1)} days × ₹{rec.perDayRate}/day = ₹{rec.calculatedSalary.toLocaleString()}
                                         </div>
                                     </div>
                                 </div>

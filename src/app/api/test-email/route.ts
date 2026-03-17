@@ -16,7 +16,7 @@ export async function GET() {
         };
 
         const result = await sendEmail({
-            to: process.env.ADMIN_EMAIL || 'infopromptix@gmail.com',
+            to: process.env.ADMIN_EMAIL || 'support@dsignxt.com',
             subject: 'Test Email from CRM 🚀',
             html: '<h1>It Works!</h1><p>Your email integration is fully configured and working.</p>'
         });
