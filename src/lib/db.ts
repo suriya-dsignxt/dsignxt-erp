@@ -28,14 +28,20 @@ async function dbConnect() {
             bufferCommands: false,
         };
 
-        cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
-            return mongoose;
+        console.log('[DB] New connection attempt...');
+        cached.promise = mongoose.connect(MONGODB_URI, opts).then((instance) => {
+            console.log('[DB] Connection successful');
+            return instance;
+        }).catch(err => {
+            console.error('[DB] Connection failed:', err);
+            throw err;
         });
     }
 
     try {
         cached.conn = await cached.promise;
     } catch (e) {
+        console.error('[DB] Cached promise error:', e);
         cached.promise = null;
         throw e;
     }
