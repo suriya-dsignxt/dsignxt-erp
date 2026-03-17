@@ -294,7 +294,7 @@ export default function EmployeeTasksPage() {
                                                             )}>
                                                                 <Calendar className="w-3 h-3" />
                                                                 <span className="text-xs font-medium">
-                                                                    Due: {new Date(task.dueDate).toLocaleDateString()}
+                                                                    Due: {new Date(task.dueDate).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })}
                                                                 </span>
                                                             </div>
                                                         )}
@@ -306,7 +306,14 @@ export default function EmployeeTasksPage() {
                                                             <div className="flex justify-between items-center">
                                                                 <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">My Commitment Deadline</label>
                                                                 {task.employeeEstimatedDeadline && (
-                                                                    <span className="text-[10px] text-blue-600 font-bold">Set</span>
+                                                                    <span className="text-[10px] text-blue-600 font-bold">
+                                                                        Set: {new Date(task.employeeEstimatedDeadline).toLocaleString('en-IN', {
+                                                                            timeZone: 'Asia/Kolkata',
+                                                                            hour: '2-digit',
+                                                                            minute: '2-digit',
+                                                                            hour12: true
+                                                                        })}
+                                                                    </span>
                                                                 )}
                                                             </div>
                                                             <input
@@ -420,7 +427,7 @@ export default function EmployeeTasksPage() {
                                             <div>
                                                 <p className="text-sm font-bold text-navy-900 line-clamp-1">{task.title}</p>
                                                 <p className="text-xs text-gray-400">
-                                                    Verified Complete • {new Date(task.completedAt || new Date()).toLocaleDateString()}
+                                                    Verified Complete • {new Date(task.completedAt || new Date()).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })}
                                                 </p>
                                             </div>
                                         </div>
