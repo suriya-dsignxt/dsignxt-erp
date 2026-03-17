@@ -27,6 +27,16 @@ import { cn } from '@/lib/utils';
 import TaskComments from '@/components/TaskComments';
 import { toast } from 'sonner';
 
+// Format Date to YYYY-MM-DDTHH:mm for datetime-local
+function formatToLocalISO(dateStr: string | undefined): string {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return '';
+    const offset = date.getTimezoneOffset();
+    const localDate = new Date(date.getTime() - (offset * 60 * 1000));
+    return localDate.toISOString().slice(0, 16);
+}
+
 interface Task {
     _id: string;
     title: string;
@@ -145,7 +155,7 @@ export default function AdminTasksPage() {
                 endDate: (task as any).endDate ? new Date((task as any).endDate).toISOString().split('T')[0] : '',
                 estimatedHours: (task as any).estimatedHours?.toString() || '',
                 dueDate: task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : '',
-                employeeEstimatedDeadline: task.employeeEstimatedDeadline ? new Date(task.employeeEstimatedDeadline).toISOString().slice(0, 16) : ''
+                employeeEstimatedDeadline: formatToLocalISO(task.employeeEstimatedDeadline)
             });
         } else {
             setEditingTask(null);
@@ -194,6 +204,13 @@ export default function AdminTasksPage() {
         // Convert estimatedHours to number if present
         if (payload.estimatedHours) {
             payload.estimatedHours = parseFloat(payload.estimatedHours);
+        }
+
+        if (payload.employeeEstimatedDeadline) {
+            const date = new Date(payload.employeeEstimatedDeadline);
+            if (!isNaN(date.getTime())) {
+                payload.employeeEstimatedDeadline = date.toISOString();
+            }
         }
 
         try {

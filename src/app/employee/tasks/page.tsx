@@ -32,6 +32,16 @@ function useDebounce<T>(value: T, delay: number): T {
     return debouncedValue;
 }
 
+// Format Date to YYYY-MM-DDTHH:mm for datetime-local
+function formatToLocalISO(dateStr: string | undefined): string {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return '';
+    const offset = date.getTimezoneOffset();
+    const localDate = new Date(date.getTime() - (offset * 60 * 1000));
+    return localDate.toISOString().slice(0, 16);
+}
+
 interface Task {
     _id: string;
     title: string;
@@ -301,8 +311,16 @@ export default function EmployeeTasksPage() {
                                                             </div>
                                                             <input
                                                                 type="datetime-local"
-                                                                value={task.employeeEstimatedDeadline ? new Date(task.employeeEstimatedDeadline).toISOString().slice(0, 16) : ''}
-                                                                onChange={(e) => updateTask(task._id, { employeeEstimatedDeadline: e.target.value })}
+                                                                value={formatToLocalISO(task.employeeEstimatedDeadline)}
+                                                                onChange={(e) => {
+                                                                    const val = e.target.value;
+                                                                    if (val) {
+                                                                        const isoStr = new Date(val).toISOString();
+                                                                        updateTask(task._id, { employeeEstimatedDeadline: isoStr });
+                                                                    } else {
+                                                                        updateTask(task._id, { employeeEstimatedDeadline: null });
+                                                                    }
+                                                                }}
                                                                 className="w-full bg-white/50 border border-gray-200 rounded-lg px-3 py-2 text-xs text-navy-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                                                             />
                                                         </div>
