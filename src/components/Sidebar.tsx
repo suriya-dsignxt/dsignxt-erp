@@ -83,8 +83,8 @@ export default function Sidebar() {
     return (
         <>
             {/* Mobile Header */}
-            <header className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white/95 backdrop-blur-md z-[50] px-4 flex items-center justify-between border-b border-gray-200 shadow-sm">
-                <div className="bg-white rounded-lg px-3 py-1 flex items-center shadow-md border border-gray-100">
+            <header className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white/95 dark:bg-navy-900/95 backdrop-blur-md z-[50] px-4 flex items-center justify-between border-b border-gray-200 dark:border-gray-800 shadow-sm">
+                <div className="bg-white dark:bg-navy-800 rounded-lg px-3 py-1 flex items-center shadow-md border border-gray-100 dark:border-gray-800">
                     <Image
                         src="/logoblack.png"
                         alt="Dsignxt ERP"
@@ -127,19 +127,19 @@ export default function Sidebar() {
             {/* Sidebar Container */}
             <aside className={`
                 fixed left-0 top-0 h-[100dvh] w-[85vw] max-w-[300px] md:w-64 
-                bg-white text-navy-900 flex flex-col shadow-2xl z-[60] border-r border-gray-200
+                bg-white dark:bg-navy-900 text-navy-900 dark:text-gray-100 flex flex-col shadow-2xl z-[60] border-r border-gray-200 dark:border-gray-800
                 transform transition-transform duration-300 cubic-bezier(0.16, 1, 0.3, 1)
                 ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
             `}>
                 {/* Logo Area */}
-                <div className="h-40 flex flex-col items-center justify-center border-b border-gray-200 bg-gray-50 relative">
-                    <div className="bg-white px-5 py-3 rounded-2xl shadow-sm border border-gray-200 flex items-center justify-center mt-2 group hover:shadow-md transition-all">
+                <div className="h-40 flex flex-col items-center justify-center border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-navy-800 relative">
+                    <div className="bg-white dark:bg-navy-900 px-5 py-3 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 flex items-center justify-center mt-2 group hover:shadow-md transition-all">
                         <Image
                             src="/logoblack.png"
                             alt="Dsignxt ERP"
                             width={160}
                             height={160}
-                            className="h-20 w-auto object-contain scale-[1.3] group-hover:scale-[1.35] transition-transform dark:hidden"
+                            className="h-20 w-auto object-contain scale-[1.3] group-hover:scale-[1.35] transition-transform block dark:hidden"
                             priority
                             unoptimized
                         />
@@ -163,11 +163,11 @@ export default function Sidebar() {
                 </div>
 
                 {/* User Profile Summary */}
-                <div className="p-6 border-b border-gray-200 bg-white">
+                <div className="p-6 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-navy-900">
                     <div className="flex items-center gap-4">
                         <div className="relative shrink-0">
                             <div className="w-12 h-12 rounded-full p-[2px] bg-gradient-to-tr from-orange-400 to-orange-600 shadow-sm">
-                                <div className="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden border-2 border-white">
+                                <div className="w-full h-full rounded-full bg-white dark:bg-navy-800 flex items-center justify-center overflow-hidden border-2 border-white dark:border-navy-900">
                                     {user.photo ? (
                                         <Image
                                             src={user.photo}
@@ -205,14 +205,14 @@ export default function Sidebar() {
                 </nav>
 
                 {/* Footer Actions */}
-                <div className="p-4 border-t border-gray-200 bg-gray-50">
+                <div className="p-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-navy-800">
                     <div className="md:hidden mb-4 flex justify-between items-center text-xs text-gray-500 px-2">
                         <span>v1.2.0</span>
                         <span>Dsignxt ERP</span>
                     </div>
                     <button
                         onClick={logout}
-                        className="w-full py-3 px-4 bg-white hover:bg-gray-100 text-gray-700 hover:text-red-600 border border-gray-200 rounded-xl transition-all duration-200 text-sm font-semibold flex items-center justify-center gap-3 group shadow-sm"
+                        className="w-full py-3 px-4 bg-white dark:bg-navy-900 hover:bg-gray-100 dark:hover:bg-navy-800 text-gray-700 dark:text-gray-300 hover:text-red-600 border border-gray-200 dark:border-gray-700 rounded-xl transition-all duration-200 text-sm font-semibold flex items-center justify-center gap-3 group shadow-sm"
                     >
                         <LogOut size={18} className="group-hover:-translate-x-1 transition-transform" />
                         <span>Sign Out</span>

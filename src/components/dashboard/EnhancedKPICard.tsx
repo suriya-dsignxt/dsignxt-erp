@@ -33,8 +33,8 @@ export default function EnhancedKPICard({
     };
 
     const getTrendColor = () => {
-        if (!trend || trend === 0) return 'text-gray-400 bg-gray-50 border-gray-100';
-        return trend > 0 ? 'text-green-600 bg-green-50 border-green-100' : 'text-red-600 bg-red-50 border-red-100';
+        if (!trend || trend === 0) return 'text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-800/20 border-gray-100 dark:border-gray-800';
+        return trend > 0 ? 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 border-green-100 dark:border-green-800' : 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border-red-100 dark:border-red-800';
     };
 
     const content = (
@@ -52,7 +52,7 @@ export default function EnhancedKPICard({
             </div>
 
             <div>
-                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-1">{title}</h3>
+                <h3 className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">{title}</h3>
                 {loading ? (
                     <div className="h-8 w-24 bg-gray-200 rounded animate-pulse"></div>
                 ) : (
@@ -62,7 +62,7 @@ export default function EnhancedKPICard({
 
             {/* Badge for pending items */}
             {badge !== undefined && badge > 0 && (
-                <div className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1.5 shadow-lg shadow-red-500/30 border-2 border-white animate-pulse">
+                <div className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1.5 shadow-lg shadow-red-500/30 border-2 border-white dark:border-navy-900 animate-pulse">
                     {badge > 99 ? '99+' : badge}
                 </div>
             )}

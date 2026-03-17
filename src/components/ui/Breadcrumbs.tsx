@@ -17,10 +17,10 @@ export default function Breadcrumbs() {
     };
 
     return (
-        <nav className="flex items-center space-x-2 text-sm text-gray-500 mb-6 animate-in fade-in slide-in-from-left-4 duration-500">
+        <nav className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400 mb-6 animate-in fade-in slide-in-from-left-4 duration-500">
             <Link
                 href={segments.includes('admin') ? '/admin/dashboard' : '/employee/dashboard'}
-                className="hover:text-navy-900 transition-colors flex items-center gap-1"
+                className="hover:text-navy-900 dark:hover:text-white transition-colors flex items-center gap-1"
             >
                 <Home size={14} />
             </Link>
@@ -34,13 +34,13 @@ export default function Breadcrumbs() {
                     <div key={href} className="flex items-center space-x-2">
                         <ChevronRight size={14} className="text-gray-300" />
                         {isLast ? (
-                            <span className="font-semibold text-navy-900">
+                            <span className="font-semibold text-navy-900 dark:text-white">
                                 {getLabel(segment)}
                             </span>
                         ) : (
                             <Link
                                 href={href}
-                                className="hover:text-navy-900 transition-colors hover:underline decoration-navy-900/20 underline-offset-4"
+                                className="hover:text-navy-900 dark:hover:text-white transition-colors hover:underline decoration-navy-900/20 dark:decoration-white/20 underline-offset-4"
                             >
                                 {getLabel(segment)}
                             </Link>

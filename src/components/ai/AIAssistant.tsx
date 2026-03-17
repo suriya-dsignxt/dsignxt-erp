@@ -51,7 +51,7 @@ export default function AIAssistant() {
 
             if (!res.ok) {
                 if (res.status === 401) {
-                    setChatHistory(prev => [...prev, { role: 'model', text: "🔒 **Access Denied**: You need to be logged in to use PromptiBot. Please log in first." }]);
+                    setChatHistory(prev => [...prev, { role: 'model', text: "🔒 **Access Denied**: You need to be logged in to use Dsignxt Bot. Please log in first." }]);
                 } else if (res.status === 503) {
                     setChatHistory(prev => [...prev, { role: 'model', text: "⚙️ **Configuration Error**: OpenAI/Gemini API key is missing. Please check `.env.local`." }]);
                 } else {
@@ -90,7 +90,7 @@ export default function AIAssistant() {
                                     <Sparkles size={18} />
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-sm">PromptiBot</h3>
+                                    <h3 className="font-bold text-sm">Dsignxt Bot</h3>
                                     <p className="text-[10px] opacity-80">AI Office Assistant</p>
                                 </div>
                             </div>
@@ -100,13 +100,13 @@ export default function AIAssistant() {
                         </div>
 
                         {/* Chat Window */}
-                        <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-white/30 backdrop-blur-md custom-scrollbar">
+                        <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-white/30 dark:bg-navy-900/50 backdrop-blur-md custom-scrollbar">
                             {chatHistory.length === 0 && (
                                 <div className="text-center py-10 space-y-3">
                                     <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto text-orange-500">
                                         <Bot size={32} />
                                     </div>
-                                    <h4 className="font-bold text-navy-900">Hi! I'm PromptiBot</h4>
+                                    <h4 className="font-bold text-navy-900">Hi! I'm Dsignxt Bot</h4>
                                     <p className="text-xs text-gray-500 px-10">Ask me about your leaves, tasks, holidays or office policies.</p>
                                     <div className="flex flex-wrap gap-2 justify-center mt-4">
                                         {['Check my leaves', 'Holidays?', 'My tasks'].map(q => (
@@ -125,8 +125,8 @@ export default function AIAssistant() {
                             {chatHistory.map((msg, i) => (
                                 <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                                     <div className={`max-w-[85%] p-3 rounded-2xl text-sm ${msg.role === 'user'
-                                        ? 'bg-navy-900 text-white rounded-tr-none shadow-lg'
-                                        : 'bg-white/80 border border-white/50 text-navy-900 rounded-tl-none shadow-sm'
+                                        ? 'bg-orange-500 text-white rounded-tr-none shadow-lg'
+                                        : 'bg-white/80 dark:bg-navy-800/80 border border-white/50 dark:border-white/10 text-navy-900 dark:text-gray-100 rounded-tl-none shadow-sm'
                                         }`}>
                                         <div className="prose prose-sm prose-navy max-w-full">
                                             <ReactMarkdown remarkPlugins={[remarkGfm]}>
@@ -139,7 +139,7 @@ export default function AIAssistant() {
 
                             {isLoading && (
                                 <div className="flex justify-start">
-                                    <div className="bg-white/80 p-3 rounded-2xl rounded-tl-none flex items-center gap-2 text-xs text-gray-500 shadow-sm">
+                                    <div className="bg-white/80 dark:bg-navy-800/80 p-3 rounded-2xl rounded-tl-none flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 shadow-sm">
                                         <Loader2 size={14} className="animate-spin" />
                                         Thinking...
                                     </div>
@@ -148,14 +148,14 @@ export default function AIAssistant() {
                         </div>
 
                         {/* Input */}
-                        <form onSubmit={handleSend} className="p-4 bg-white/50 border-t border-white/30">
+                        <form onSubmit={handleSend} className="p-4 bg-white/50 dark:bg-navy-900/50 border-t border-white/30 dark:border-white/10">
                             <div className="relative flex items-center">
                                 <input
                                     type="text"
                                     value={message}
                                     onChange={(e) => setMessage(e.target.value)}
                                     placeholder="Type your question..."
-                                    className="w-full bg-white border border-gray-100 rounded-full pl-4 pr-12 py-2.5 text-sm font-medium focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all"
+                                    className="w-full bg-white dark:bg-navy-800 border border-gray-100 dark:border-gray-800 rounded-full pl-4 pr-12 py-2.5 text-sm font-medium focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all dark:text-gray-100"
                                 />
                                 <button
                                     type="submit"

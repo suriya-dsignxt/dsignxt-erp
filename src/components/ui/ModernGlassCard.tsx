@@ -45,8 +45,8 @@ export default function ModernGlassCard({
             {(title || headerAction) && (
                 <div className="flex justify-between items-start mb-4 relative z-10">
                     <div>
-                        {title && <h3 className="text-lg font-bold text-navy-900 tracking-tight">{title}</h3>}
-                        {subtitle && <p className="text-sm text-gray-500 font-medium mt-1">{subtitle}</p>}
+                        {title && <h3 className="text-lg font-bold text-navy-900 dark:text-white tracking-tight">{title}</h3>}
+                        {subtitle && <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mt-1">{subtitle}</p>}
                     </div>
                     {headerAction && <div>{headerAction}</div>}
                 </div>
