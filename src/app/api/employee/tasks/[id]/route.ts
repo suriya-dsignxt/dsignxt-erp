@@ -49,11 +49,17 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
         // Update ONLY progress and status (Pending/In Progress)
         const previousStatus = task.status;
-        task.status = status || task.status;
-        task.progressPercentage = progressPercentage !== undefined ? progressPercentage : task.progressPercentage;
-        if (employeeEstimatedDeadline) task.employeeEstimatedDeadline = new Date(employeeEstimatedDeadline);
-        if (attachment) task.attachments.push(attachment);
-
+        if (status) task.status = status;
+        if (progressPercentage !== undefined) task.progressPercentage = progressPercentage;
+        
+        if (employeeEstimatedDeadline !== undefined) {
+            task.employeeEstimatedDeadline = employeeEstimatedDeadline ? new Date(employeeEstimatedDeadline) : null;
+        }
+        
+        if (attachment) {
+            task.attachments.push(attachment);
+        }
+ 
         await task.save();
 
         // Sync Goal Progress

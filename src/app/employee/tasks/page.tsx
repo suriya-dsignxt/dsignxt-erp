@@ -20,6 +20,7 @@ import {
 import ModernGlassCard from '@/components/ui/ModernGlassCard';
 import { cn } from '@/lib/utils';
 import TaskComments from '@/components/TaskComments';
+import { toast } from 'sonner';
 
 // Debounce helper for progress updates
 function useDebounce<T>(value: T, delay: number): T {
@@ -87,14 +88,24 @@ export default function EmployeeTasksPage() {
     const updateTask = async (taskId: string, payload: any) => {
         setUpdatingIds(prev => new Set(prev).add(taskId));
         try {
-            await fetch(`/api/employee/tasks/${taskId}`, {
+            const res = await fetch(`/api/employee/tasks/${taskId}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
+            const data = await res.json();
+            
+            if (res.ok) {
+                setTasks(prev => prev.map(t => t._id === taskId ? data.task : t));
+                if (payload.employeeEstimatedDeadline !== undefined) {
+                    toast.success('Commitment deadline updated');
+                }
+            } else {
+                toast.error(data.message || 'Update failed');
+            }
         } catch (error) {
             console.error('Error updating task:', error);
-            // Revert on error would go here
+            toast.error('An error occurred during update');
         } finally {
             setUpdatingIds(prev => {
                 const next = new Set(prev);
@@ -151,9 +162,9 @@ export default function EmployeeTasksPage() {
                 };
 
                 await updateTask(taskId, { attachment });
-                fetchTasks(); // Refresh to show attachment
+                toast.success('File uploaded and attached to task');
             } else {
-                alert(data.message || 'Upload failed');
+                toast.error(data.message || 'Upload failed');
             }
         } catch (error) {
             console.error('Upload error:', error);
