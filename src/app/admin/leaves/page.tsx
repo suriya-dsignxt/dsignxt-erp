@@ -5,7 +5,7 @@ import Sidebar from '@/components/Sidebar';
 import AdvancedTable from '@/components/ui/AdvancedTable';
 import ModernGlassCard from '@/components/ui/ModernGlassCard';
 import PageHeader from '@/components/ui/PageHeader';
-import { CheckCircle, XCircle, Clock, Calendar, FileText, Check, X, AlertCircle, Loader2 } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, Calendar, FileText, Check, X, AlertCircle, Loader2, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function AdminLeaves() {
@@ -52,6 +52,38 @@ export default function AdminLeaves() {
             return `Leave request ${status} successfully`;
         }, {
             loading: `Updating status to ${status}...`,
+            success: (data) => {
+                setActionLoading(null);
+                return data;
+            },
+            error: (err) => {
+                setActionLoading(null);
+                setLeaves(previousLeaves);
+                return `Error: ${err.message}`;
+            }
+        });
+    };
+
+    const handleDeleteLeave = async (id: string) => {
+        if (!confirm('Are you sure you want to remove this leave request? This action cannot be undone.')) return;
+
+        setActionLoading(id + 'delete');
+        const previousLeaves = [...leaves];
+        setLeaves(prev => prev.filter(l => l._id !== id));
+
+        toast.promise(async () => {
+            const res = await fetch(`/api/admin/leaves/${id}`, {
+                method: 'DELETE'
+            });
+
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}));
+                throw new Error(errorData.message || 'Failed to delete leave request');
+            }
+            await fetchLeaves();
+            return 'Leave request deleted successfully';
+        }, {
+            loading: 'Deleting leave request...',
             success: (data) => {
                 setActionLoading(null);
                 return data;
@@ -149,25 +181,40 @@ export default function AdminLeaves() {
         {
             header: "Actions",
             accessor: (item: any) => {
-                if (item.status !== 'Pending') return <span className="text-gray-300 text-sm font-medium italic">Completed</span>;
-
                 return (
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 items-center">
+                        {item.status === 'Pending' ? (
+                            <>
+                                <button
+                                    onClick={() => handleStatusUpdate(item._id, 'Approved')}
+                                    disabled={actionLoading === item._id + 'Approved'}
+                                    className="p-2 bg-green-50 text-green-600 hover:bg-green-100 hover:text-green-700 rounded-lg transition-all shadow-sm border border-green-100 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:scale-100"
+                                    title="Approve Request"
+                                >
+                                    {actionLoading === item._id + 'Approved' ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} strokeWidth={3} />}
+                                </button>
+                                <button
+                                    onClick={() => handleStatusUpdate(item._id, 'Rejected')}
+                                    disabled={actionLoading === item._id + 'Rejected'}
+                                    className="p-2 bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 rounded-lg transition-all shadow-sm border border-red-100 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:scale-100"
+                                    title="Reject Request"
+                                >
+                                    {actionLoading === item._id + 'Rejected' ? <Loader2 size={16} className="animate-spin" /> : <X size={16} strokeWidth={3} />}
+                                </button>
+                            </>
+                        ) : (
+                            <span className="text-gray-300 text-xs font-medium italic mr-2 flex items-center gap-1">
+                                <CheckCircle size={10} className="text-gray-300" />
+                                {item.status}
+                            </span>
+                        )}
                         <button
-                            onClick={() => handleStatusUpdate(item._id, 'Approved')}
-                            disabled={actionLoading === item._id + 'Approved'}
-                            className="p-2 bg-green-50 text-green-600 hover:bg-green-100 hover:text-green-700 rounded-lg transition-all shadow-sm border border-green-100 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:scale-100"
-                            title="Approve Request"
+                            onClick={() => handleDeleteLeave(item._id)}
+                            disabled={actionLoading === item._id + 'delete'}
+                            className="p-2 bg-gray-50 text-gray-400 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all shadow-sm border border-gray-100 hover:border-red-100 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:scale-100"
+                            title="Remove Permanently"
                         >
-                            {actionLoading === item._id + 'Approved' ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} strokeWidth={3} />}
-                        </button>
-                        <button
-                            onClick={() => handleStatusUpdate(item._id, 'Rejected')}
-                            disabled={actionLoading === item._id + 'Rejected'}
-                            className="p-2 bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 rounded-lg transition-all shadow-sm border border-red-100 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:scale-100"
-                            title="Reject Request"
-                        >
-                            {actionLoading === item._id + 'Rejected' ? <Loader2 size={16} className="animate-spin" /> : <X size={16} strokeWidth={3} />}
+                            {actionLoading === item._id + 'delete' ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
                         </button>
                     </div>
                 );
